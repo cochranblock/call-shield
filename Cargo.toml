@@ -3,6 +3,10 @@ name = "call-shield"
 version = "0.1.0"
 edition = "2024"
 license = "Unlicense"
+description = "On-device call screening without the cloud"
+repository = "https://github.com/cochranblock/call-shield"
+keywords = ["call-screening", "privacy", "on-device", "spam-filter"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 
