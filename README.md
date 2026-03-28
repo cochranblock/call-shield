@@ -41,6 +41,10 @@ call-shield classify "Hello?"
 
 See [WHITEPAPER.md](WHITEPAPER.md) for full design.
 
+## Federal Compliance
+
+See [govdocs/](govdocs/) — SBOM, SSDF, supply chain, security, privacy, FIPS, FedRAMP, CMMC, ITAR/EAR, accessibility, and federal use cases.
+
 **Stack:** Rust, zero dependencies, pattern-match classifier (ML classifier planned)
 **Binary:** 312 KB (will grow to ~42MB with Whisper)
 **License:** Unlicense
