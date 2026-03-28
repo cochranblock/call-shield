@@ -26,64 +26,74 @@ flowchart TD
 
 | Metric | Value |
 |--------|-------|
-| Release binary size | 319,248 bytes (312 KB) |
-| Pre-classifier binary | 285,936 bytes (279 KB) |
-| ARM aarch64 binary | 285,936 bytes (279 KB, pre-classifier) |
-| Source LOC | 140 (src/main.rs) |
-| Functions (P13) | 5 (f0-f4) |
-| Types (P13) | 1 (t0) |
+| Release binary size | 368,896 bytes (360 KB) |
+| Source LOC | 474 (src/main.rs) |
+| Functions (P13) | 11 (f0-f10) |
+| Types (P13) | 2 (t0-t1) |
 | Fields (P13) | 2 (s0-s1) |
 | Dependencies | 0 (zero external crates) |
 | Classification patterns | 35 (20 spam, 15 legitimate) |
-| Govdocs files | 11 (federal compliance) |
+| Embedded govdocs | 11 files baked into binary |
 | Cloud dependencies | Zero |
 | Audio sent to cloud | Zero bytes, ever |
-| Classification latency | <1ms on-device (pattern match) |
+| Classification latency | <1ms on-device |
 | Connectivity required | None |
 
-## QA Results — 2026-03-27
+## Features
 
-### QA Round 1
-- `cargo build --release`: PASS — zero errors, zero warnings
-- `git diff`: clean (no unintended changes)
+| Feature | Status |
+|---------|--------|
+| `classify` — single-line intent classification | Working |
+| `screen` — interactive multi-turn call screening | Working |
+| `govdocs` — embedded compliance docs at runtime | Working |
+| `--sbom` — machine-readable SPDX 2.3 SBOM | Working |
+| `--help` / `--version` | Working |
+| Error handling (bad input, unknown commands) | Working |
+| Whisper Tiny on-device STT | Planned |
+| Real audio capture | Planned |
+| Telephony integration | Planned |
+
+## QA Results
+
+### QA Round 1 — 2026-03-27
+- `cargo build --release`: PASS
+- `git diff`: clean
 - Binary runs: PASS
 
-### QA Round 2
-- `cargo clean && cargo build --release`: PASS — fresh compile, zero errors
-- `cargo clippy --release -- -D warnings`: PASS — zero warnings
-- `git status`: clean after Cargo.lock commit
-- Last commit: `1d6bad5` — verified correct
+### QA Round 2 — 2026-03-27
+- `cargo clean && cargo build --release`: PASS
+- `cargo clippy --release -- -D warnings`: PASS
+- `git status`: clean
 
 ### P13 Tokenization Stats
-- Functions tokenized: f0-f4 (5 total)
-- Types tokenized: t0 (1 total)
-- Fields tokenized: s0-s1 (2 total)
+- Functions: f0-f10 (11 total)
+- Types: t0-t1 (2 total)
+- Fields: s0-s1 (2 total)
 - Compression map: [docs/compression_map.md](docs/compression_map.md)
-
-### User Story Analysis
-- Usability: 1/10 → improved with CLI + help text
-- Completeness: 1/10 → improved with classifier
-- Error handling: 1/10 → improved with input validation
-- Documentation: 5/10 → improved with README rewrite
-- Full analysis: [USER_STORY_ANALYSIS.md](USER_STORY_ANALYSIS.md)
 
 ## CLI Verification
 
 ```bash
 cargo build --release
-./target/release/call-shield --help
-./target/release/call-shield --version
+
+# Classify
 ./target/release/call-shield classify "press 1 to speak with a representative"
-# → verdict: SPAM, score: 0.90
-./target/release/call-shield classify "this is Dr. Smith confirming your appointment"
-# → verdict: LEGITIMATE, score: 0.85
-./target/release/call-shield classify "hello"
-# → verdict: UNKNOWN, score: 0.50
+# → verdict: SPAM, score: 0.90, matched: press 1
+
+# Interactive screening
+./target/release/call-shield screen
+# → Multi-turn conversation with real-time classification
+
+# Embedded compliance docs
+./target/release/call-shield govdocs sbom
+
+# Machine-readable SBOM for federal scanners
+./target/release/call-shield --sbom > sbom.spdx
 ```
 
 ## Federal Compliance
 
-11 documents in [govdocs/](govdocs/):
+11 documents in [govdocs/](govdocs/), also embedded in the binary:
 SBOM, SSDF, Supply Chain, Security, Accessibility, Privacy, FIPS, FedRAMP, CMMC, ITAR/EAR, Federal Use Cases.
 
 ---

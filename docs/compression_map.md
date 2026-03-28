@@ -11,12 +11,19 @@
 | f2 | version — print version | src/main.rs |
 | f3 | classify — intent classification on text input | src/main.rs |
 | f4 | score — pattern-match classifier | src/main.rs |
+| f5 | govdocs — print embedded compliance docs | src/main.rs |
+| f6 | govdocs_all — dump all compliance docs | src/main.rs |
+| f7 | screen — interactive call screening session | src/main.rs |
+| f8 | decide — routing decision from session state | src/main.rs |
+| f9 | print_stats — display session statistics | src/main.rs |
+| f10 | sbom_spdx — machine-readable SPDX SBOM | src/main.rs |
 
 ## Types
 
 | Token | Name | Location |
 |-------|------|----------|
-| t0 | Verdict — classification result (&str) | src/main.rs |
+| t0 | ClassifyResult — classification output | src/main.rs |
+| t1 | SessionStats — running stats for screening session | src/main.rs |
 
 ## Fields
 
@@ -35,6 +42,9 @@
 | Token | Name | Description |
 |-------|------|-------------|
 | classify | classify | Classify caller transcript text |
+| screen | screen | Interactive call screening session |
+| govdocs | govdocs | Print embedded federal compliance docs |
+| --sbom | sbom | Machine-readable SPDX SBOM |
 
 ---
 

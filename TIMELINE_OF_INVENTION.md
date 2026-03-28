@@ -52,6 +52,24 @@ Updated compression map to f0-f4, t0, s0-s1. Binary grew to 319,248 bytes (312 K
 **Commit:** `efd8e91`
 **AI Role:** AI drafted all compliance documents. Human directed scope and verified claims against source.
 
+### 2026-03-27 — TOI/POA Update
+
+**What:** Updated Timeline of Invention and Proof of Artifacts with all commits, binary sizes, QA results, P13 stats.
+**Commit:** `151784d`
+
+### 2026-03-28 — Dogfooding: Embedded Govdocs + Interactive Screening + SPDX SBOM
+
+**What:** The binary now serves its own compliance docs at runtime. Added:
+1. `govdocs` subcommand — prints any of 11 embedded compliance docs to stdout
+2. `--sbom` flag — outputs machine-readable SPDX 2.3 format SBOM parsed live from embedded Cargo.toml
+3. `screen` command — interactive call screening session with multi-turn conversation, real-time classification, session stats, and automatic routing decisions (block spam, pass legit, prompt unknowns, voicemail after 3 inconclusive turns)
+4. Enhanced classifier — now reports matched patterns in output
+5. Compression map updated: f0-f10, t0-t1, s0-s1 (11 functions, 2 types, 2 fields)
+
+Binary: 368,896 bytes (360 KB), zero dependencies. Every compliance doc a contracting officer needs ships in the executable.
+**Commit:** See `git log --oneline`
+**AI Role:** AI implemented all features. Human directed architecture and dogfooding requirement.
+
 ---
 
 *Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture. All source under the Unlicense.*
