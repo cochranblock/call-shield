@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#000000">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CALL SHIELD"
+        android:textSize="28sp"
+        android:textColor="#00FF41"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="On-device call screening. Zero cloud."
+        android:textSize="14sp"
+        android:textColor="#00AA2A"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#00FF41"
+        android:fontFamily="monospace"
+        android:background="#111111"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/enable_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ENABLE SHIELD"
+        android:textColor="#000000"
+        android:backgroundTint="#00FF41"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TEST CLASSIFIER"
+        android:textSize="16sp"
+        android:textColor="#00FF41"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/input_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter caller speech..."
+        android:textColor="#00FF41"
+        android:textColorHint="#005500"
+        android:fontFamily="monospace"
+        android:background="#111111"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/classify_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CLASSIFY"
+        android:textColor="#000000"
+        android:backgroundTint="#00AA2A"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/result_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#00FF41"
+        android:fontFamily="monospace"
+        android:background="#111111"
+        android:padding="16dp" />
+
+</LinearLayout>
