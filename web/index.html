@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="On-device call screening without the cloud">
+    <title>Call Shield</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            padding: 24px;
+            min-height: 100vh;
+        }
+        h1 { font-size: 28px; margin-bottom: 4px; }
+        .subtitle { color: #00aa2a; font-size: 14px; margin-bottom: 24px; }
+        .panel {
+            background: #111;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+        input[type="text"] {
+            width: 100%;
+            background: #111;
+            color: #00ff41;
+            border: 1px solid #00aa2a;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        input::placeholder { color: #005500; }
+        button {
+            width: 100%;
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        button:active { background: #00aa2a; }
+        #result { white-space: pre-wrap; min-height: 60px; }
+        .label { color: #00aa2a; font-size: 12px; margin-bottom: 8px; }
+        .install-prompt {
+            display: none;
+            background: #001a00;
+            border: 1px solid #00ff41;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .install-prompt button { width: auto; padding: 8px 24px; }
+    </style>
+</head>
+<body>
+    <h1>CALL SHIELD</h1>
+    <p class="subtitle">On-device call screening. Zero cloud. Runs in your browser.</p>
+
+    <div id="install-prompt" class="install-prompt">
+        <p>Install Call Shield for offline use</p>
+        <button id="install-btn">INSTALL</button>
+    </div>
+
+    <div class="panel" id="status">
+        Classifier loaded. 35 patterns. Zero network.
+    </div>
+
+    <p class="label">CALLER SPEECH</p>
+    <input type="text" id="input" placeholder="Enter what the caller said..."
+           autofocus>
+    <button id="classify-btn">CLASSIFY</button>
+
+    <p class="label">VERDICT</p>
+    <div class="panel" id="result">Enter caller speech above and tap CLASSIFY.</div>
+
+    <script>
+    // Pattern-match classifier — same as Rust CLI, runs in browser
+    const SPAM = [
+        ["extended warranty", 0.95], ["car warranty", 0.95],
+        ["been trying to reach you", 0.90], ["courtesy call", 0.85],
+        ["special offer", 0.85], ["selected for", 0.80],
+        ["press 1", 0.90], ["press one", 0.90],
+        ["limited time", 0.80], ["act now", 0.80],
+        ["free gift", 0.85], ["congratulations you", 0.85],
+        ["you have won", 0.90], ["lower your rate", 0.85],
+        ["reduce your debt", 0.85], ["irs", 0.75],
+        ["social security number", 0.95], ["arrest warrant", 0.95],
+        ["legal action", 0.80], ["final notice", 0.85],
+    ];
+    const LEGIT = [
+        ["appointment", 0.80], ["confirming your", 0.85],
+        ["returning your call", 0.90], ["you called us", 0.85],
+        ["this is dr", 0.80], ["this is doctor", 0.80],
+        ["from your bank", 0.60], ["your order", 0.70],
+        ["delivery", 0.70], ["picking up", 0.75],
+        ["schedule", 0.70], ["follow up", 0.70],
+        ["checking in", 0.65], ["your application", 0.65],
+        ["interview", 0.80],
+    ];
+
+    function classify(text) {
+        text = text.toLowerCase();
+        let spamMax = 0, legitMax = 0, matched = [];
+        for (const [p, w] of SPAM) {
+            if (text.includes(p)) { if (w > spamMax) spamMax = w; matched.push(p); }
+        }
+        for (const [p, w] of LEGIT) {
+            if (text.includes(p)) { if (w > legitMax) legitMax = w; matched.push(p); }
+        }
+        if (spamMax > legitMax && spamMax > 0.5)
+            return { verdict: "SPAM", score: spamMax, matched };
+        if (legitMax > spamMax && legitMax > 0.5)
+            return { verdict: "LEGITIMATE", score: legitMax, matched };
+        return { verdict: "UNKNOWN", score: 0.5 - Math.abs(spamMax - legitMax), matched };
+    }
+
+    const input = document.getElementById("input");
+    const result = document.getElementById("result");
+
+    function runClassify() {
+        const text = input.value.trim();
+        if (!text) { result.textContent = "Enter caller speech above."; return; }
+        const r = classify(text);
+        let out = `Verdict:  ${r.verdict}\nScore:    ${(r.score * 100).toFixed(0)}%`;
+        if (r.matched.length) out += `\nMatched:  ${r.matched.join(", ")}`;
+        result.textContent = out;
+    }
+
+    document.getElementById("classify-btn").addEventListener("click", runClassify);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") runClassify(); });
+
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener("beforeinstallprompt", e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById("install-prompt").style.display = "block";
+    });
+    document.getElementById("install-btn").addEventListener("click", () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            document.getElementById("install-prompt").style.display = "none";
+        }
+    });
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js");
+    }
+    </script>
+</body>
+</html>

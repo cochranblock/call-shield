@@ -1,0 +1,22 @@
+[package]
+name = "call-shield-ios"
+version = "0.1.0"
+edition = "2024"
+license = "Unlicense"
+description = "Call Shield iOS static library"
+
+[lib]
+name = "call_shield_ios"
+crate-type = ["staticlib"]
+path = "src/lib.rs"
+
+[dependencies]
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
+
+[workspace]
