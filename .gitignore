@@ -5,3 +5,12 @@
 /android/app/build
 /android/.gradle
 /android/local.properties
+.DS_Store
+*.swp
+*.swo
+*~
+*.orig
+*.bak
+*.log
+*.env
+*.jks

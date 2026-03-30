@@ -57,7 +57,7 @@ Updated compression map to f0-f4, t0, s0-s1. Binary grew to 319,248 bytes (312 K
 **What:** Updated Timeline of Invention and Proof of Artifacts with all commits, binary sizes, QA results, P13 stats.
 **Commit:** `151784d`
 
-### 2026-03-28 — Dogfooding: Embedded Govdocs + Interactive Screening + SPDX SBOM
+### 2026-03-28 — Embedded Govdocs + Interactive Screening + SPDX SBOM
 
 **What:** The binary now serves its own compliance docs at runtime. Added:
 1. `govdocs` subcommand — prints any of 11 embedded compliance docs to stdout
@@ -66,9 +66,35 @@ Updated compression map to f0-f4, t0, s0-s1. Binary grew to 319,248 bytes (312 K
 4. Enhanced classifier — now reports matched patterns in output
 5. Compression map updated: f0-f10, t0-t1, s0-s1 (11 functions, 2 types, 2 fields)
 
-Binary: 368,896 bytes (360 KB), zero dependencies. Every compliance doc a contracting officer needs ships in the executable.
-**Commit:** See `git log --oneline`
+Binary: 368,896 bytes (360 KB), zero dependencies.
+**Commit:** `9047b17`
 **AI Role:** AI implemented all features. Human directed architecture and dogfooding requirement.
+
+### 2026-03-28 — Crates.io Prep
+
+**What:** Added crates.io metadata to Cargo.toml: description, repository URL, keywords, categories. `cargo publish --dry-run` passed clean.
+**Commit:** `ad38176`
+
+### 2026-03-29 — Android App (CallScreeningService, API 35)
+
+**What:** Full Android app: `ShieldScreeningService` (registered `CallScreeningService`), `IntentClassifier` (35-pattern Java port), `ShieldActivity` (enable shield, test classifier, CRT green theme). No INTERNET permission. `network_security_config.xml` denies cleartext. Package: `org.cochranblock.callshield`, minSdk 29, targetSdk 35.
+**Commit:** `459c6ca`
+**AI Role:** AI implemented Android app. Human directed architecture and package naming.
+
+### 2026-03-29 — iOS App + PWA + Multi-Arch Build Script
+
+**What:** Three platforms in one commit:
+1. iOS static library (`ios/src/lib.rs`) — C ABI bridge for Swift, `call_shield_classify`/`call_shield_free`. Swift AppDelegate with `@_silgen_name` bridge, CallKit integration. Builds for `aarch64-apple-ios` (5.3 MB .a file).
+2. PWA (`web/`) — offline-first Progressive Web App with service worker, same 35-pattern classifier in JS, manifest.json, installable from any browser.
+3. Multi-arch build script (`scripts/build-all-targets.sh`) — 12 targets: macOS ARM/Intel, Linux x86/ARM64/ARM32, RISC-V, Windows, FreeBSD, POWER, Android, iOS, WASM.
+**Commit:** `64e31a5`
+**AI Role:** AI implemented all three platforms. Human directed architecture.
+
+### 2026-03-29 — Android AAB Build
+
+**What:** Fixed `ShieldScreeningService` API (correct `getHandlePresentation()` + `TelecomManager` constants). Generated launcher icons for all densities. Added gradle wrapper. Built real `app-release.aab`: 14,105 bytes (14 KB), R8 minified, resources shrunk. Uploaded to GitHub Release v0.1.0.
+**Commit:** `8954d1c`
+**AI Role:** AI fixed API, generated icons, built AAB. Human directed.
 
 ---
 
