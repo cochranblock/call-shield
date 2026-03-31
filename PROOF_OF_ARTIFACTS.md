@@ -42,8 +42,8 @@ flowchart TD
 | Android dependencies | 0 | Only Android SDK |
 | Classification patterns | 35 (20 spam + 15 legit) | Counted in source |
 | Embedded govdocs | 11 files | `include_str!` in main.rs |
-| Git commits | 12 | `git log --oneline \| wc -l` |
-| Files tracked | 48 | `git ls-files \| wc -l` |
+| Git commits | 14 | `git log --oneline \| wc -l` |
+| Files tracked | 57 | `git ls-files \| wc -l` |
 | Cargo audit advisories | 0 | `cargo audit` |
 | Clippy warnings | 0 | `cargo clippy -- -D warnings` |
 | Cloud dependencies | Zero | No INTERNET in AndroidManifest |

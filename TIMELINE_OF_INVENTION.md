@@ -96,6 +96,12 @@ Binary: 368,896 bytes (360 KB), zero dependencies.
 **Commit:** `8954d1c`
 **AI Role:** AI fixed API, generated icons, built AAB. Human directed.
 
+### 2026-03-30 — Truth Audit + Supply Chain Audit
+
+**What:** Adversarial fact-check of every claim in README, POA, TOI, and govdocs. Spot-checked 5 commit hashes against `git show --stat` — all match. Rebuilt binary and verified sizes. Ran `cargo audit` (0 advisories). Reviewed all source for unsafe blocks (0 in CLI, 2 justified in iOS FFI). Wrote `govdocs/SUPPLY_CHAIN_AUDIT.md` with full federal-grade dependency analysis. Updated TOI with all 12 commits. Updated POA with verified metrics. Hardened `.gitignore`.
+**Commit:** `224aaf6`
+**AI Role:** AI ran full audit and fixed all stale docs. Human directed.
+
 ---
 
 *Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture. All source under the Unlicense.*
