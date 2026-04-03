@@ -10,9 +10,9 @@ Prioritized work items for call-shield. Most important at top. Max 20.
 
 ---
 
-1. `[docs]` Update govdoc dates — SECURITY, CMMC, ACCESSIBILITY, SSDF, SBOM, PRIVACY, FIPS, FedRAMP still say "Last updated: 2026-03-27" despite content changes in 2026-04-02/03.
-2. `[feature]` PWA service worker scope fix — `sw.js` registration is relative, may fail in subdirectory deployments. Use absolute path.
-3. `[test]` Android unit tests — no JUnit tests for IntentClassifier.java or ShieldScreeningService. Add to gradle build.
+1. `[fix]` Replace `static mut THRESHOLD` with `AtomicU64` — current unsafe global is undefined behavior under parallel test execution (`cargo test` is multi-threaded by default). Store f64 bits via `f64::to_bits()`/`from_bits()`. Eliminates data race in every test run.
+2. `[fix]` Android: remove unused `READ_CALL_LOG` permission + add JUnit tests for `IntentClassifier` — `READ_CALL_LOG` grants full device call history but is never read; contradicts the privacy story and will flag in Play Store review. JUnit tests should mirror Rust suite: spam, legit, unknown, score bounds, vishing vectors.
+3. `[fix]` Implement `call_shield_classify` / `call_shield_free` C-ABI exports in Rust lib target — iOS `AppDelegate.swift` calls these via `@_silgen_name` but they don't exist in any Rust source. Add `#[no_mangle] pub extern "C"` functions outputting `VERDICT|score|matched` pipe-delimited. Unblocks iOS platform entirely.
 4. `[build]` crates.io publish — metadata ready (`cargo publish --dry-run` passed). Bump version done (0.2.0). Publish when stable.
 5. `[feature]` Whisper Tiny integration — embed quantized Whisper model for on-device speech-to-text. Core whitepaper promise. **Depends on [kova](https://github.com/cochranblock/kova) Candle/Whisper work in pixel-forge and kova inference modules**
 6. `[build]` iOS Xcode project — no `.xcodeproj` or `Package.swift` exists. Swift code compiles nowhere. Need extension target for CXCallDirectoryExtension. **Depends on Apple developer account for provisioning**
