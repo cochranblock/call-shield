@@ -1,3 +1,5 @@
+<!-- Unlicense — cochranblock.org -->
+
 # Compression Map — Call Shield
 
 > P13 tokenization. Every public symbol gets a compressed identifier.
@@ -49,3 +51,5 @@
 ---
 
 *Updated as symbols are added. Token numbers are append-only — never reuse a retired token.*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

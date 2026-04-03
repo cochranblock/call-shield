@@ -82,3 +82,5 @@ grep -ri "tcp\|udp\|http\|socket\|connect\|reqwest\|hyper" src/
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

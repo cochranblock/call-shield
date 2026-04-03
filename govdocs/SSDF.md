@@ -21,7 +21,7 @@
 | PW.5 — Create source code by adhering to secure coding practices | Done | Rust's borrow checker prevents memory corruption. No unsafe blocks. No raw pointer use. Clippy clean with warnings-as-errors. |
 | PW.6 — Configure the compilation and build processes | Done | Release profile: LTO enabled, single codegen unit, panic=abort, stripped symbols. Cargo.lock committed for reproducible builds. |
 | PW.7 — Review and/or analyze human-readable code | Done | QA Round 1 and Round 2 passed. Clippy --release -- -D warnings clean. |
-| PW.9 — Test executable code | Partial | Manual CLI testing across all code paths. No automated test suite yet. |
+| PW.9 — Test executable code | Done | 17 automated tests via `cargo test`: classifier correctness, false-positive regression, vishing vector regression, score edge cases, SBOM validation. Zero failures. |
 
 ## RV: Respond to Vulnerabilities
 
@@ -56,3 +56,5 @@ cargo clippy --release -- -D warnings
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

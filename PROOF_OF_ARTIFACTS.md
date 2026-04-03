@@ -8,6 +8,8 @@
 
 ## Architecture
 
+*Target architecture — current v0.1.x uses pattern-match classifier without Whisper.*
+
 ```mermaid
 flowchart TD
     Call[Incoming Call] --> Answer[Call Shield Answers]
@@ -30,19 +32,20 @@ flowchart TD
 | CLI binary (Linux x86_64) | 385,232 bytes (376 KB) | Built on st via SSH |
 | iOS static lib | 5,550,144 bytes (5.3 MB) | `cargo build --target aarch64-apple-ios` |
 | Android AAB | 14,105 bytes (14 KB) | `./gradlew bundleRelease` |
-| Source LOC (Rust CLI) | 474 | `wc -l src/main.rs` |
-| Source LOC (iOS lib) | 114 | `wc -l ios/src/lib.rs` |
+| Source LOC (Rust CLI) | 602 | `wc -l src/main.rs` |
+| Source LOC (iOS lib) | 117 | `wc -l ios/src/lib.rs` |
 | Source LOC (Android Java) | 248 | `wc -l android/app/src/main/java/**/*.java` |
-| Source LOC (PWA) | 166 | `wc -l web/index.html` |
-| Source LOC (total) | 1,002 | All platforms |
+| Source LOC (PWA) | 169 | `wc -l web/index.html` |
+| Source LOC (total) | 1,136 | All platforms |
 | Functions (P13 tokenized) | 11 (f0-f10) | `grep "^fn f" src/main.rs` |
 | Types (P13 tokenized) | 2 (t0-t1) | `grep "^struct T" src/main.rs` |
 | Fields (P13 tokenized) | 2 (s0-s1) | In-function locals |
 | Rust dependencies | 0 | `cargo tree --depth 1` |
 | Android dependencies | 0 | Only Android SDK |
-| Classification patterns | 35 (20 spam + 15 legit) | Counted in source |
+| Classification patterns | 38 (24 spam + 14 legit) | Counted in source |
+| Automated tests | 17 | `cargo test` |
 | Embedded govdocs | 11 files | `include_str!` in main.rs |
-| Git commits | 14 | `git log --oneline \| wc -l` |
+| Git commits | 15 | `git log --oneline \| wc -l` |
 | Files tracked | 57 | `git ls-files \| wc -l` |
 | Cargo audit advisories | 0 | `cargo audit` |
 | Clippy warnings | 0 | `cargo clippy -- -D warnings` |
@@ -84,10 +87,11 @@ flowchart TD
 | QA Round 2 | 2026-03-27 | PASS |
 | Truth audit | 2026-03-30 | PASS — all claims verified |
 | Supply chain audit | 2026-03-30 | PASS — 0 deps, 0 advisories |
+| v0.2.0 test suite | 2026-04-02 | PASS — 17 tests, 0 failures |
 
 ## Supply Chain
 
-Zero third-party dependencies. `cargo audit`: 0 advisories. `Cargo.lock`: committed. No typosquatting risk (no deps to squat). No unsafe code. Full audit in [govdocs/SUPPLY_CHAIN_AUDIT.md](govdocs/SUPPLY_CHAIN_AUDIT.md).
+Zero third-party dependencies. `cargo audit`: 0 advisories. `Cargo.lock`: committed. No typosquatting risk (no deps to squat). No unsafe code in CLI binary (iOS lib has 2 justified unsafe blocks at FFI boundary). Full audit in [govdocs/SUPPLY_CHAIN_AUDIT.md](govdocs/SUPPLY_CHAIN_AUDIT.md).
 
 ---
 

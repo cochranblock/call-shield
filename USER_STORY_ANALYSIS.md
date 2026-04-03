@@ -1,5 +1,7 @@
 <!-- Unlicense — cochranblock.org -->
 
+> **HISTORICAL SNAPSHOT (2026-03-27)** — This analysis scored the pre-implementation scaffold at 1.6/10. The issues identified here drove the v0.1.0 and v0.2.0 implementations. For current status, see [README.md](README.md) and [PROOF_OF_ARTIFACTS.md](PROOF_OF_ARTIFACTS.md).
+
 # User Story Analysis — Call Shield
 
 *Full end-to-end walkthrough as a real user. 2026-03-27.*
@@ -146,3 +148,5 @@ Tell the user what they can do today, what's coming, and how to contribute.
 ---
 
 *Analysis by Kova augment engine. Brutal and honest as requested.*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

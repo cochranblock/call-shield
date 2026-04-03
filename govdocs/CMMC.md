@@ -15,7 +15,7 @@ Call Shield is an on-device tool with no network connectivity, no data storage, 
 | Practice | Status | Evidence |
 |----------|--------|----------|
 | AC.L1-3.1.1 — Limit system access to authorized users | N/A | Standalone CLI tool. Access controlled by OS-level file permissions on the binary. |
-| AC.L1-3.1.2 — Limit system access to authorized functions | Done | Binary has exactly 3 functions exposed to user: help, version, classify. No hidden commands. |
+| AC.L1-3.1.2 — Limit system access to authorized functions | Done | Binary has 6 commands exposed to user: help, version, classify, screen, govdocs, sbom. No hidden commands. All documented in `--help`. |
 | AC.L1-3.1.20 — Control connections to external systems | Done | Zero external connections. No network code. Verified by zero dependencies. |
 
 ### IA — Identification and Authentication
@@ -69,3 +69,5 @@ Call Shield's minimal attack surface (no network, no storage, no auth) means mos
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

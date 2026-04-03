@@ -29,7 +29,7 @@
 
 ## Deep Code Review
 
-### Rust CLI (`src/main.rs`, 474 LOC)
+### Rust CLI (`src/main.rs`, 602 LOC)
 
 - **unsafe blocks:** 0
 - **unwrap() calls:** 1 (on `stdin.lock().read_line()` — panics only on broken stdin pipe, acceptable)
@@ -39,7 +39,7 @@
 - **Command injection:** No shell execution
 - **Input validation:** CLI args matched by exact string comparison
 
-### iOS Library (`ios/src/lib.rs`, 114 LOC)
+### iOS Library (`ios/src/lib.rs`, 117 LOC)
 
 - **unsafe blocks:** 2 (both at FFI boundary — `CStr::from_ptr` and `CString::from_raw`)
 - **Justified:** Required for C ABI interop with Swift. Null pointer checks on both functions.
@@ -47,12 +47,12 @@
 
 ### Android Java (`android/app/src/main/java/`, 248 LOC)
 
-- **Permissions:** `READ_PHONE_STATE`, `READ_CALL_LOG`, `RECORD_AUDIO` — all required for call screening
+- **Permissions:** `READ_PHONE_STATE`, `READ_CALL_LOG` — required for call screening. `RECORD_AUDIO` removed in v0.2.0 (was unused).
 - **No INTERNET permission:** Verified in AndroidManifest.xml
 - **No reflection:** No dynamic class loading
 - **ProGuard:** Minification enabled, keeps only screening service and classifier
 
-### PWA (`web/index.html`, 166 LOC)
+### PWA (`web/index.html`, 169 LOC)
 
 - **No external scripts:** All JS inline
 - **No fetch/XHR:** No network calls
@@ -76,3 +76,5 @@ Scanning Cargo.lock for vulnerabilities (1 crate dependencies)
 ---
 
 *Last updated: 2026-03-30*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

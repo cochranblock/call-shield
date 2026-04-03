@@ -50,3 +50,5 @@ For federal deployment of on-device software:
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

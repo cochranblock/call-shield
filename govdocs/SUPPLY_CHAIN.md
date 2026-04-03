@@ -56,9 +56,11 @@ cargo build --release --frozen
 - No Docker images (no container supply chain risk)
 - No CI/CD pipeline (no third-party build service access)
 - No vendored C libraries
-- No FFI calls
+- No FFI calls in CLI binary (iOS lib exposes C ABI for Swift interop -- see [SUPPLY_CHAIN_AUDIT.md](SUPPLY_CHAIN_AUDIT.md))
 - No dynamic linking beyond libc (stripped in release)
 
 ---
 
-*Last updated: 2026-03-27*
+*Last updated: 2026-04-02*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

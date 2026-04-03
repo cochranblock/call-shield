@@ -38,8 +38,8 @@ ls .env* 2>/dev/null
 ## Memory Safety
 
 - Language: Rust (memory-safe by default)
-- Unsafe blocks: 0
-- Raw pointer use: 0
+- Unsafe blocks: 0 in CLI binary (`src/main.rs`). iOS lib (`ios/src/lib.rs`) has 2 justified unsafe blocks at FFI boundary.
+- Raw pointer use: 0 in CLI binary. iOS lib uses `CStr::from_ptr`/`CString::from_raw` for Swift interop.
 - Manual memory management: 0
 - Buffer overflows: prevented by compiler
 
@@ -61,3 +61,5 @@ ls .env* 2>/dev/null
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

@@ -52,3 +52,5 @@ When egui GUI or mobile interface is added:
 ---
 
 *Last updated: 2026-03-27*
+
+*Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture.*

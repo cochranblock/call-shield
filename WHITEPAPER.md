@@ -10,7 +10,9 @@
 
 Every major call screening solution — Google Call Screen, Apple Silence Unknown Callers, carrier-level spam filters — routes your voice data through centralized cloud infrastructure. Your audio is processed on servers you don't own, by companies whose business model is data harvesting. The screening works, but the privacy cost is invisible and non-negotiable.
 
-Call Shield is an on-device call screening agent compiled into a single Rust binary. It runs on your phone's hardware with zero cloud connectivity. Incoming calls are answered locally by a Whisper-based speech-to-text model and a lightweight intent classifier — both embedded in the binary. The caller's intent is determined on-device in milliseconds. Spam is killed. Legitimate calls ring through. No audio ever leaves the device.
+Call Shield is an on-device call screening agent compiled into a single Rust binary. It runs on your phone's hardware with zero cloud connectivity. The v1.0 architecture embeds a Whisper-based speech-to-text model and a lightweight intent classifier in the binary. The caller's intent is determined on-device in milliseconds. Spam is killed. Legitimate calls ring through. No audio ever leaves the device.
+
+*Current status (v0.1.x): ships a 38-pattern text classifier (24 spam, 14 legit) across CLI, Android, iOS, and PWA. Whisper integration is planned for v1.0.*
 
 This is not a privacy wrapper around an existing cloud service. This is a replacement for the cloud service itself.
 
@@ -32,7 +34,9 @@ A developer building zero-cloud, edge-compute, sovereign infrastructure — usin
 
 ## 2. The Solution: Embedded Intelligence on the Device
 
-### 2.1 Architecture
+### 2.1 Target Architecture
+
+*Current v0.1.x ships a pattern-match text classifier (38 patterns, 360 KB binary). The architecture below is the v1.0 goal with embedded Whisper STT.*
 
 ```
 Incoming Call
@@ -51,7 +55,7 @@ Decision:
 Zero audio leaves the device. Ever.
 ```
 
-### 2.2 The Binary
+### 2.2 The Binary (Projected v1.0)
 
 | Component | Size | Purpose |
 |-----------|------|---------|
@@ -59,6 +63,8 @@ Zero audio leaves the device. Ever.
 | Intent classifier | <1MB | Spam vs legitimate vs unknown |
 | Call handling logic | <1MB | Answer, prompt, route, hang up |
 | **Total binary** | **~42MB** | Everything. No cloud. No dependencies. |
+
+*Current v0.1.x binary: 360 KB (pattern-match classifier only, zero dependencies).*
 
 42MB is larger than a typical CochranBlock binary (18MB) but still fits comfortably in L3 cache working set on any modern phone chip. Cold-boot to first classification: under 500ms.
 
