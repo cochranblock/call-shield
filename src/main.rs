@@ -1,4 +1,5 @@
 use std::io::{self, BufRead, Write};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 // Embedded govdocs — baked into binary at compile time
 const GOVDOC_SBOM: &str = include_str!("../govdocs/SBOM.md");
@@ -18,10 +19,15 @@ const GOVDOC_SUPPLY_CHAIN_AUDIT: &str = include_str!("../govdocs/SUPPLY_CHAIN_AU
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
 
 /// Global threshold for classification confidence. Default 0.5.
-static mut THRESHOLD: f64 = 0.5;
+/// AtomicU64 stores f64 bits — safe under parallel test execution.
+static THRESHOLD: AtomicU64 = AtomicU64::new(0x3FE0000000000000); // 0.5_f64.to_bits()
 
 fn threshold() -> f64 {
-    unsafe { THRESHOLD }
+    f64::from_bits(THRESHOLD.load(Ordering::Relaxed))
+}
+
+fn set_threshold(t: f64) {
+    THRESHOLD.store(t.to_bits(), Ordering::Relaxed);
 }
 
 /// f0=main — entry point, CLI dispatch
@@ -35,7 +41,7 @@ fn f0() {
         if args[i] == "--threshold" {
             if let Some(val) = args.get(i + 1) {
                 match val.parse::<f64>() {
-                    Ok(t) if (0.0..=1.0).contains(&t) => unsafe { THRESHOLD = t },
+                    Ok(t) if (0.0..=1.0).contains(&t) => set_threshold(t),
                     _ => {
                         eprintln!("--threshold must be a number between 0.0 and 1.0");
                         std::process::exit(1);
@@ -907,15 +913,73 @@ mod tests {
     }
 
     // =========================================================================
-    // THRESHOLD
+    // THRESHOLD — AtomicU64 correctness
     // =========================================================================
 
     #[test]
     fn threshold_default_is_half() {
-        // Note: tests run in parallel with shared mutable state
-        // This test verifies default behavior
-        assert!(threshold() >= 0.0);
-        assert!(threshold() <= 1.0);
+        // AtomicU64 constant encodes 0.5_f64.to_bits() — verify the round-trip
+        assert!((threshold() - 0.5).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn threshold_bits_roundtrip() {
+        // f64 <-> u64 bit reinterpretation must be lossless
+        for v in [0.0_f64, 0.1, 0.5, 0.7, 0.9, 1.0] {
+            let bits = v.to_bits();
+            let back = f64::from_bits(bits);
+            assert!((back - v).abs() < f64::EPSILON, "roundtrip failed for {v}");
+        }
+    }
+
+    #[test]
+    fn set_threshold_stores_and_loads() {
+        let original = threshold();
+        set_threshold(0.75);
+        assert!((threshold() - 0.75).abs() < f64::EPSILON);
+        set_threshold(original);
+    }
+
+    #[test]
+    fn set_threshold_zero() {
+        let original = threshold();
+        set_threshold(0.0);
+        assert!((threshold() - 0.0).abs() < f64::EPSILON);
+        set_threshold(original);
+    }
+
+    #[test]
+    fn set_threshold_one() {
+        let original = threshold();
+        set_threshold(1.0);
+        assert!((threshold() - 1.0).abs() < f64::EPSILON);
+        set_threshold(original);
+    }
+
+    #[test]
+    fn threshold_atomic_constant_value() {
+        // Verify the AtomicU64 initializer literal matches 0.5_f64.to_bits()
+        assert_eq!(0x3FE0000000000000_u64, 0.5_f64.to_bits());
+    }
+
+    #[test]
+    fn classifier_respects_threshold_via_atomic() {
+        // "from your bank" weight = 0.70. At threshold 0.8 it should be UNKNOWN.
+        let original = threshold();
+        set_threshold(0.8);
+        let r = f4("calling from your bank");
+        assert_eq!(r.verdict, "UNKNOWN", "0.70 weight should be UNKNOWN at threshold 0.8");
+        set_threshold(original);
+    }
+
+    #[test]
+    fn classifier_respects_threshold_low() {
+        // At threshold 0.0 anything with weight > 0 classifies.
+        let original = threshold();
+        set_threshold(0.0);
+        let r = f4("calling from your bank"); // weight 0.70
+        assert_eq!(r.verdict, "SPAM", "0.70 weight should be SPAM at threshold 0.0");
+        set_threshold(original);
     }
 
     // =========================================================================
