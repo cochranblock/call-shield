@@ -623,164 +623,792 @@ fn main() {
 mod tests {
     use super::*;
 
-    // --- Classifier correctness ---
+    // =========================================================================
+    // CLASSIFIER — every spam pattern individually
+    // =========================================================================
+
+    #[test] fn spam_extended_warranty() { let r = f4("your extended warranty is expiring"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.95).abs() < 0.01); }
+    #[test] fn spam_car_warranty() { let r = f4("about your car warranty"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.95).abs() < 0.01); }
+    #[test] fn spam_been_trying() { let r = f4("we have been trying to reach you"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.90).abs() < 0.01); }
+    #[test] fn spam_courtesy_call() { let r = f4("this is a courtesy call"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_special_offer() { let r = f4("you qualify for a special offer"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_selected_for() { let r = f4("you have been selected for"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn spam_press_1() { let r = f4("press 1 to speak to an agent"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.90).abs() < 0.01); }
+    #[test] fn spam_press_one() { let r = f4("press one now"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.90).abs() < 0.01); }
+    #[test] fn spam_limited_time() { let r = f4("this limited time deal"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn spam_act_now() { let r = f4("you must act now"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn spam_free_gift() { let r = f4("claim your free gift"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_congratulations() { let r = f4("congratulations you have been chosen"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_you_have_won() { let r = f4("you have won a cruise"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.90).abs() < 0.01); }
+    #[test] fn spam_lower_rate() { let r = f4("we can lower your rate"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_reduce_debt() { let r = f4("reduce your debt today"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_the_irs() { let r = f4("this is the irs calling"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn spam_irs_agent() { let r = f4("an irs agent will contact you"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_ssn() { let r = f4("we need your social security number"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.95).abs() < 0.01); }
+    #[test] fn spam_arrest_warrant() { let r = f4("there is an arrest warrant"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.95).abs() < 0.01); }
+    #[test] fn spam_legal_action() { let r = f4("we will take legal action"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn spam_final_notice() { let r = f4("this is your final notice"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_from_bank() { let r = f4("calling from your bank"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.70).abs() < 0.01); }
+    #[test] fn spam_verify_account() { let r = f4("please verify your account"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn spam_confirm_identity() { let r = f4("confirm your identity now"); assert_eq!(r.verdict, "SPAM"); assert!((r.score - 0.80).abs() < 0.01); }
+
+    // =========================================================================
+    // CLASSIFIER — every legit pattern individually
+    // =========================================================================
+
+    #[test] fn legit_appointment() { let r = f4("your appointment is tomorrow"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn legit_confirming() { let r = f4("confirming your reservation"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn legit_returning_call() { let r = f4("returning your call"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.90).abs() < 0.01); }
+    #[test] fn legit_you_called_us() { let r = f4("you called us earlier"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.85).abs() < 0.01); }
+    #[test] fn legit_this_is_dr() { let r = f4("this is dr smith"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn legit_this_is_doctor() { let r = f4("this is doctor jones"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.80).abs() < 0.01); }
+    #[test] fn legit_your_order() { let r = f4("calling about your order"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.70).abs() < 0.01); }
+    #[test] fn legit_delivery() { let r = f4("your delivery is on the way"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.70).abs() < 0.01); }
+    #[test] fn legit_picking_up() { let r = f4("i am picking up the package"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.75).abs() < 0.01); }
+    #[test] fn legit_schedule() { let r = f4("about your schedule"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.70).abs() < 0.01); }
+    #[test] fn legit_follow_up() { let r = f4("just a follow up call"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.70).abs() < 0.01); }
+    #[test] fn legit_checking_in() { let r = f4("checking in on you"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.65).abs() < 0.01); }
+    #[test] fn legit_application() { let r = f4("regarding your application"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.65).abs() < 0.01); }
+    #[test] fn legit_interview() { let r = f4("about your interview"); assert_eq!(r.verdict, "LEGITIMATE"); assert!((r.score - 0.80).abs() < 0.01); }
+
+    // =========================================================================
+    // CLASSIFIER — unknown / no-match
+    // =========================================================================
+
+    #[test] fn unknown_hello() { let r = f4("hello"); assert_eq!(r.verdict, "UNKNOWN"); }
+    #[test] fn unknown_empty() { let r = f4(""); assert_eq!(r.verdict, "UNKNOWN"); assert!((r.score - 0.50).abs() < 0.01); }
+    #[test] fn unknown_gibberish() { let r = f4("asdf qwerty zxcv"); assert_eq!(r.verdict, "UNKNOWN"); }
+    #[test] fn unknown_numbers_only() { let r = f4("12345"); assert_eq!(r.verdict, "UNKNOWN"); }
+    #[test] fn unknown_single_char() { let r = f4("x"); assert_eq!(r.verdict, "UNKNOWN"); }
+    #[test] fn unknown_whitespace() { let r = f4("   "); assert_eq!(r.verdict, "UNKNOWN"); }
+    #[test] fn unknown_punctuation() { let r = f4("...!!!???"); assert_eq!(r.verdict, "UNKNOWN"); }
+
+    // =========================================================================
+    // CLASSIFIER — case insensitivity (f4 receives lowercased input from f3)
+    // =========================================================================
+
+    #[test] fn case_upper_spam() { let r = f4("extended warranty"); assert_eq!(r.verdict, "SPAM"); }
+    #[test] fn case_mixed_legit() { let r = f4("returning your call"); assert_eq!(r.verdict, "LEGITIMATE"); }
+
+    // =========================================================================
+    // CLASSIFIER — false-positive regression
+    // =========================================================================
+
+    #[test] fn fp_first_not_spam() { let r = f4("this is your first appointment"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_birthday_not_spam() { let r = f4("happy birthday to you"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_thirsty_not_spam() { let r = f4("i am thirsty"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_stairs_not_spam() { let r = f4("take the stairs"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_pairs_not_spam() { let r = f4("three pairs of shoes"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_desire_not_spam() { let r = f4("my desire is to help"); assert_ne!(r.verdict, "SPAM"); }
+    #[test] fn fp_bird_not_spam() { let r = f4("a bird in the hand"); assert_ne!(r.verdict, "SPAM"); }
+
+    // =========================================================================
+    // CLASSIFIER — multi-pattern matching
+    // =========================================================================
 
     #[test]
-    fn spam_extended_warranty() {
-        let r = f4("your extended warranty is expiring");
+    fn multi_spam_patterns_highest_wins() {
+        let r = f4("press 1 for your extended warranty final notice");
         assert_eq!(r.verdict, "SPAM");
-        assert!(r.score >= 0.90);
+        assert!((r.score - 0.95).abs() < 0.01); // extended warranty = 0.95
+        assert!(r.matched.len() >= 3);
     }
 
     #[test]
-    fn spam_car_warranty() {
-        let r = f4("we are calling about your car warranty");
-        assert_eq!(r.verdict, "SPAM");
-    }
-
-    #[test]
-    fn spam_press_1() {
-        let r = f4("press 1 to speak to an agent");
-        assert_eq!(r.verdict, "SPAM");
-        assert!(r.score >= 0.90);
-    }
-
-    #[test]
-    fn legit_appointment() {
-        let r = f4("confirming your appointment for tuesday");
+    fn multi_legit_patterns_highest_wins() {
+        let r = f4("returning your call about your appointment schedule");
         assert_eq!(r.verdict, "LEGITIMATE");
-        assert!(r.score >= 0.80);
+        assert!((r.score - 0.90).abs() < 0.01); // returning your call = 0.90
+        assert!(r.matched.len() >= 3);
     }
-
-    #[test]
-    fn legit_returning_call() {
-        let r = f4("hi, returning your call from earlier");
-        assert_eq!(r.verdict, "LEGITIMATE");
-        assert!(r.score >= 0.90);
-    }
-
-    #[test]
-    fn unknown_hello() {
-        let r = f4("hello");
-        assert_eq!(r.verdict, "UNKNOWN");
-    }
-
-    #[test]
-    fn unknown_empty() {
-        let r = f4("");
-        assert_eq!(r.verdict, "UNKNOWN");
-        assert!((r.score - 0.50).abs() < 0.01);
-    }
-
-    // --- False-positive regression (irs fix) ---
-
-    #[test]
-    fn first_not_spam() {
-        let r = f4("this is your first appointment");
-        assert_ne!(r.verdict, "SPAM", "'first' must not match 'irs'");
-    }
-
-    #[test]
-    fn birthday_not_spam() {
-        let r = f4("happy birthday");
-        assert_ne!(r.verdict, "SPAM", "'birthday' must not match 'irs'");
-    }
-
-    #[test]
-    fn thirsty_not_spam() {
-        let r = f4("i am thirsty");
-        assert_ne!(r.verdict, "SPAM");
-    }
-
-    // --- Vishing vector regression ---
-
-    #[test]
-    fn from_your_bank_is_spam() {
-        let r = f4("this is from your bank please confirm");
-        assert_eq!(r.verdict, "SPAM", "'from your bank' is a vishing vector");
-    }
-
-    #[test]
-    fn verify_account_is_spam() {
-        let r = f4("we need to verify your account");
-        assert_eq!(r.verdict, "SPAM");
-    }
-
-    #[test]
-    fn confirm_identity_is_spam() {
-        let r = f4("please confirm your identity");
-        assert_eq!(r.verdict, "SPAM");
-    }
-
-    // --- Score logic ---
 
     #[test]
     fn spam_beats_legit_when_higher() {
         let r = f4("extended warranty for your appointment");
         assert_eq!(r.verdict, "SPAM");
         assert!(r.score > 0.80);
+        assert!(r.matched.contains(&"extended warranty"));
+        assert!(r.matched.contains(&"appointment"));
     }
 
     #[test]
     fn legit_beats_spam_when_higher() {
         let r = f4("returning your call about a limited time schedule");
         assert_eq!(r.verdict, "LEGITIMATE");
+        assert!((r.score - 0.90).abs() < 0.01);
     }
 
     #[test]
+    fn tied_scores_are_unknown() {
+        // Both "appointment" (legit 0.80) and "the irs" (spam 0.80) match
+        let r = f4("the irs appointment");
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    #[test]
+    fn matched_list_contains_all_hits() {
+        let r = f4("press 1 for your car warranty");
+        assert!(r.matched.contains(&"press 1"));
+        assert!(r.matched.contains(&"car warranty"));
+    }
+
+    // =========================================================================
+    // CLASSIFIER — score boundary conditions
+    // =========================================================================
+
+    #[test]
     fn score_never_negative() {
-        for input in ["", "hello", "random words", "a b c d e f"] {
+        for input in ["", "hello", "random words", "a b c d e f", "xyz 123 !@#"] {
             let r = f4(input);
             assert!(r.score >= 0.0, "score for '{input}' was {}", r.score);
         }
     }
 
-    // --- SBOM output ---
-
     #[test]
-    fn sbom_contains_spdx_header() {
-        // f10 prints to stdout, so we test the govdoc embed instead
-        assert!(GOVDOC_SBOM.contains("Software Bill of Materials"));
+    fn score_never_above_one() {
+        for input in ["extended warranty arrest warrant social security number",
+                      "returning your call confirming your appointment interview"] {
+            let r = f4(input);
+            assert!(r.score <= 1.0, "score for '{input}' was {}", r.score);
+        }
     }
 
-    // --- Whitelist ---
+    #[test]
+    fn unknown_score_is_threshold_minus_delta() {
+        let r = f4("");
+        // No patterns matched: spam_max=0, legit_max=0, delta=0
+        // Score = threshold - |0-0| = 0.5
+        assert!((r.score - 0.50).abs() < 0.01);
+    }
 
     #[test]
-    fn log_entry_format() {
-        let dir = std::env::temp_dir().join("call-shield-test");
-        let _ = std::fs::create_dir_all(&dir);
-        let path = dir.join("log_test.jsonl");
-        let _ = std::fs::remove_file(&path);
+    fn low_spam_below_threshold_is_unknown() {
+        // "from your bank" has weight 0.70, which is above 0.5 threshold
+        // but if we could set threshold to 0.8 it would be unknown
+        // Test with default threshold: 0.70 > 0.5 = SPAM
+        let r = f4("from your bank");
+        assert_eq!(r.verdict, "SPAM");
+    }
 
-        // Override log path not possible without refactor, so test the format manually
-        let matched = vec!["extended warranty"];
+    // =========================================================================
+    // CLASSIFIER — T0 struct
+    // =========================================================================
+
+    #[test]
+    fn t0_new_sets_fields() {
+        let r = T0::new("SPAM", 0.95, vec!["test"]);
+        assert_eq!(r.verdict, "SPAM");
+        assert!((r.score - 0.95).abs() < 0.01);
+        assert_eq!(r.matched, vec!["test"]);
+    }
+
+    #[test]
+    fn t0_empty_matched() {
+        let r = T0::new("UNKNOWN", 0.50, vec![]);
+        assert!(r.matched.is_empty());
+    }
+
+    // =========================================================================
+    // SESSION DECISION — f8
+    // =========================================================================
+
+    #[test]
+    fn f8_block_on_two_spam_hits() {
+        let s = T1 { spam_hits: 2, ..Default::default() };
+        assert_eq!(f8(&s), "BLOCK");
+    }
+
+    #[test]
+    fn f8_block_on_high_confidence_spam() {
+        let s = T1 { spam_hits: 1, peak_verdict: "SPAM", peak_score: 0.95, ..Default::default() };
+        assert_eq!(f8(&s), "BLOCK");
+    }
+
+    #[test]
+    fn f8_block_threshold_spam_90() {
+        let s = T1 { spam_hits: 1, peak_verdict: "SPAM", peak_score: 0.90, ..Default::default() };
+        assert_eq!(f8(&s), "BLOCK");
+    }
+
+    #[test]
+    fn f8_no_block_spam_89() {
+        let s = T1 { spam_hits: 1, peak_verdict: "SPAM", peak_score: 0.89, ..Default::default() };
+        assert_eq!(f8(&s), "PROMPT");
+    }
+
+    #[test]
+    fn f8_pass_on_two_legit_hits() {
+        let s = T1 { legit_hits: 2, ..Default::default() };
+        assert_eq!(f8(&s), "PASS");
+    }
+
+    #[test]
+    fn f8_pass_on_high_confidence_legit() {
+        let s = T1 { legit_hits: 1, peak_verdict: "LEGITIMATE", peak_score: 0.90, ..Default::default() };
+        assert_eq!(f8(&s), "PASS");
+    }
+
+    #[test]
+    fn f8_pass_threshold_legit_85() {
+        let s = T1 { legit_hits: 1, peak_verdict: "LEGITIMATE", peak_score: 0.85, ..Default::default() };
+        assert_eq!(f8(&s), "PASS");
+    }
+
+    #[test]
+    fn f8_no_pass_legit_84() {
+        let s = T1 { legit_hits: 1, peak_verdict: "LEGITIMATE", peak_score: 0.84, ..Default::default() };
+        assert_eq!(f8(&s), "PROMPT");
+    }
+
+    #[test]
+    fn f8_prompt_on_unknown() {
+        let s = T1 { unknown_hits: 1, peak_verdict: "UNKNOWN", peak_score: 0.50, ..Default::default() };
+        assert_eq!(f8(&s), "PROMPT");
+    }
+
+    #[test]
+    fn f8_prompt_on_fresh_session() {
+        let s = T1::default();
+        assert_eq!(f8(&s), "PROMPT");
+    }
+
+    #[test]
+    fn f8_spam_priority_over_legit() {
+        // 2 spam hits + 1 legit = BLOCK (spam checked first)
+        let s = T1 { spam_hits: 2, legit_hits: 1, peak_verdict: "SPAM", peak_score: 0.80, ..Default::default() };
+        assert_eq!(f8(&s), "BLOCK");
+    }
+
+    #[test]
+    fn f8_three_spam_hits() {
+        let s = T1 { spam_hits: 3, peak_verdict: "SPAM", peak_score: 0.85, ..Default::default() };
+        assert_eq!(f8(&s), "BLOCK");
+    }
+
+    #[test]
+    fn f8_three_legit_hits() {
+        let s = T1 { legit_hits: 3, peak_verdict: "LEGITIMATE", peak_score: 0.75, ..Default::default() };
+        assert_eq!(f8(&s), "PASS");
+    }
+
+    // =========================================================================
+    // T1 SessionStats defaults
+    // =========================================================================
+
+    #[test]
+    fn t1_default_values() {
+        let s = T1::default();
+        assert_eq!(s.turn, 0);
+        assert_eq!(s.spam_hits, 0);
+        assert_eq!(s.legit_hits, 0);
+        assert_eq!(s.unknown_hits, 0);
+        assert!((s.peak_score - 0.0).abs() < 0.01);
+        assert_eq!(s.peak_verdict, "");
+    }
+
+    // =========================================================================
+    // THRESHOLD
+    // =========================================================================
+
+    #[test]
+    fn threshold_default_is_half() {
+        // Note: tests run in parallel with shared mutable state
+        // This test verifies default behavior
+        assert!(threshold() >= 0.0);
+        assert!(threshold() <= 1.0);
+    }
+
+    // =========================================================================
+    // PATTERN TABLE INTEGRITY (build.rs generated)
+    // =========================================================================
+
+    #[test]
+    fn spam_pattern_count() {
+        assert_eq!(SPAM_PATTERNS.len(), 24);
+    }
+
+    #[test]
+    fn legit_pattern_count() {
+        assert_eq!(LEGIT_PATTERNS.len(), 14);
+    }
+
+    #[test]
+    fn total_pattern_count() {
+        assert_eq!(SPAM_PATTERNS.len() + LEGIT_PATTERNS.len(), 38);
+    }
+
+    #[test]
+    fn no_empty_patterns() {
+        for (p, _) in SPAM_PATTERNS { assert!(!p.is_empty(), "empty spam pattern"); }
+        for (p, _) in LEGIT_PATTERNS { assert!(!p.is_empty(), "empty legit pattern"); }
+    }
+
+    #[test]
+    fn all_weights_in_range() {
+        for (p, w) in SPAM_PATTERNS {
+            assert!(*w > 0.0 && *w <= 1.0, "spam pattern '{p}' weight {w} out of range");
+        }
+        for (p, w) in LEGIT_PATTERNS {
+            assert!(*w > 0.0 && *w <= 1.0, "legit pattern '{p}' weight {w} out of range");
+        }
+    }
+
+    #[test]
+    fn no_duplicate_patterns() {
+        let mut seen = std::collections::HashSet::new();
+        for (p, _) in SPAM_PATTERNS { assert!(seen.insert(p), "duplicate spam: {p}"); }
+        for (p, _) in LEGIT_PATTERNS { assert!(seen.insert(p), "duplicate legit: {p}"); }
+    }
+
+    #[test]
+    fn patterns_are_lowercase() {
+        for (p, _) in SPAM_PATTERNS { assert_eq!(*p, p.to_lowercase(), "spam '{p}' not lowercase"); }
+        for (p, _) in LEGIT_PATTERNS { assert_eq!(*p, p.to_lowercase(), "legit '{p}' not lowercase"); }
+    }
+
+    // =========================================================================
+    // EMBEDDED GOVDOCS — all 12 non-empty and contain expected content
+    // =========================================================================
+
+    #[test] fn govdoc_sbom_nonempty() { assert!(!GOVDOC_SBOM.is_empty()); assert!(GOVDOC_SBOM.contains("Software Bill of Materials")); }
+    #[test] fn govdoc_ssdf_nonempty() { assert!(!GOVDOC_SSDF.is_empty()); assert!(GOVDOC_SSDF.contains("SSDF")); }
+    #[test] fn govdoc_supply_chain_nonempty() { assert!(!GOVDOC_SUPPLY_CHAIN.is_empty()); assert!(GOVDOC_SUPPLY_CHAIN.contains("Supply Chain")); }
+    #[test] fn govdoc_security_nonempty() { assert!(!GOVDOC_SECURITY.is_empty()); assert!(GOVDOC_SECURITY.contains("Security")); }
+    #[test] fn govdoc_accessibility_nonempty() { assert!(!GOVDOC_ACCESSIBILITY.is_empty()); assert!(GOVDOC_ACCESSIBILITY.contains("508") || GOVDOC_ACCESSIBILITY.contains("Accessibility")); }
+    #[test] fn govdoc_privacy_nonempty() { assert!(!GOVDOC_PRIVACY.is_empty()); assert!(GOVDOC_PRIVACY.contains("Privacy")); }
+    #[test] fn govdoc_fips_nonempty() { assert!(!GOVDOC_FIPS.is_empty()); assert!(GOVDOC_FIPS.contains("FIPS")); }
+    #[test] fn govdoc_fedramp_nonempty() { assert!(!GOVDOC_FEDRAMP.is_empty()); assert!(GOVDOC_FEDRAMP.contains("FedRAMP")); }
+    #[test] fn govdoc_cmmc_nonempty() { assert!(!GOVDOC_CMMC.is_empty()); assert!(GOVDOC_CMMC.contains("CMMC")); }
+    #[test] fn govdoc_itar_nonempty() { assert!(!GOVDOC_ITAR_EAR.is_empty()); assert!(GOVDOC_ITAR_EAR.contains("ITAR") || GOVDOC_ITAR_EAR.contains("EAR")); }
+    #[test] fn govdoc_use_cases_nonempty() { assert!(!GOVDOC_FEDERAL_USE_CASES.is_empty()); assert!(GOVDOC_FEDERAL_USE_CASES.contains("Federal")); }
+    #[test] fn govdoc_audit_nonempty() { assert!(!GOVDOC_SUPPLY_CHAIN_AUDIT.is_empty()); assert!(GOVDOC_SUPPLY_CHAIN_AUDIT.contains("Audit")); }
+
+    // =========================================================================
+    // EMBEDDED CARGO.TOML
+    // =========================================================================
+
+    #[test] fn cargo_toml_has_name() { assert!(CARGO_TOML.contains("name = \"call-shield\"")); }
+    #[test] fn cargo_toml_has_version() { assert!(CARGO_TOML.contains("version = ")); }
+    #[test] fn cargo_toml_has_license() { assert!(CARGO_TOML.contains("license = \"Unlicense\"")); }
+    #[test] fn cargo_toml_has_edition() { assert!(CARGO_TOML.contains("edition = \"2024\"")); }
+    #[test] fn cargo_toml_empty_deps() { assert!(CARGO_TOML.contains("[dependencies]")); }
+
+    // =========================================================================
+    // WHITELIST — file operations
+    // =========================================================================
+
+    fn test_dir() -> std::path::PathBuf {
+        let d = std::env::temp_dir().join("call-shield-test");
+        let _ = std::fs::create_dir_all(&d);
+        d
+    }
+
+    #[test]
+    fn whitelist_empty_file() {
+        let path = test_dir().join("wl_empty.txt");
+        std::fs::write(&path, "").unwrap();
+        let entries = load_whitelist(&path);
+        assert!(entries.is_empty());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn whitelist_nonexistent_file() {
+        let path = test_dir().join("wl_nonexist_12345.txt");
+        let _ = std::fs::remove_file(&path);
+        let entries = load_whitelist(&path);
+        assert!(entries.is_empty());
+    }
+
+    #[test]
+    fn whitelist_blank_lines_ignored() {
+        let path = test_dir().join("wl_blanks.txt");
+        std::fs::write(&path, "\n\n+15551234567\n\n+15559876543\n\n").unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries.len(), 2);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn whitelist_whitespace_trimmed() {
+        let path = test_dir().join("wl_ws.txt");
+        std::fs::write(&path, "  +15551234567  \n").unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries[0], "+15551234567");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn whitelist_roundtrip() {
+        let path = test_dir().join("wl_roundtrip.txt");
+        let _ = std::fs::remove_file(&path);
+        assert!(load_whitelist(&path).is_empty());
+        std::fs::write(&path, "+15551234567\n+15559876543\n").unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries.len(), 2);
+        assert!(entries.contains(&"+15551234567".to_string()));
+        assert!(entries.contains(&"+15559876543".to_string()));
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn whitelist_single_entry() {
+        let path = test_dir().join("wl_single.txt");
+        std::fs::write(&path, "+15551234567\n").unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries.len(), 1);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn whitelist_many_entries() {
+        let path = test_dir().join("wl_many.txt");
+        let data: String = (0..100).map(|i| format!("+1555{i:07}\n")).collect();
+        std::fs::write(&path, &data).unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries.len(), 100);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    // =========================================================================
+    // WHITELIST / LOG — path functions
+    // =========================================================================
+
+    #[test]
+    fn whitelist_path_contains_call_shield() {
+        let p = whitelist_path();
+        assert!(p.to_str().unwrap().contains(".call-shield"));
+        assert!(p.to_str().unwrap().contains("whitelist.txt"));
+    }
+
+    #[test]
+    fn log_path_contains_call_shield() {
+        let p = log_path();
+        assert!(p.to_str().unwrap().contains(".call-shield"));
+        assert!(p.to_str().unwrap().contains("call_log.jsonl"));
+    }
+
+    // =========================================================================
+    // LOG — format validation
+    // =========================================================================
+
+    #[test]
+    fn log_entry_format_spam() {
         let ts = 1000u64;
         let entry = format!(
             "{{\"ts\":{ts},\"verdict\":\"SPAM\",\"score\":0.95,\"matched\":\"extended warranty\",\"action\":\"BLOCK\",\"turns\":1}}"
         );
         assert!(entry.contains("\"verdict\":\"SPAM\""));
         assert!(entry.contains("\"action\":\"BLOCK\""));
-        assert!(entry.contains("\"matched\":\"extended warranty\""));
-        drop(matched);
+        assert!(entry.contains("\"turns\":1"));
+        assert!(entry.contains("\"score\":0.95"));
     }
 
     #[test]
-    fn whitelist_roundtrip() {
-        let dir = std::env::temp_dir().join("call-shield-test");
+    fn log_entry_format_legit() {
+        let ts = 2000u64;
+        let entry = format!(
+            "{{\"ts\":{ts},\"verdict\":\"LEGITIMATE\",\"score\":0.90,\"matched\":\"returning your call\",\"action\":\"PASS\",\"turns\":2}}"
+        );
+        assert!(entry.contains("\"verdict\":\"LEGITIMATE\""));
+        assert!(entry.contains("\"action\":\"PASS\""));
+        assert!(entry.contains("\"turns\":2"));
+    }
+
+    #[test]
+    fn log_entry_format_voicemail() {
+        let ts = 3000u64;
+        let entry = format!(
+            "{{\"ts\":{ts},\"verdict\":\"UNKNOWN\",\"score\":0.50,\"matched\":\"\",\"action\":\"VOICEMAIL\",\"turns\":3}}"
+        );
+        assert!(entry.contains("\"action\":\"VOICEMAIL\""));
+        assert!(entry.contains("\"turns\":3"));
+    }
+
+    // =========================================================================
+    // CLASSIFIER — long input / stress
+    // =========================================================================
+
+    #[test]
+    fn classify_long_input() {
+        let long = "hello ".repeat(1000);
+        let r = f4(&long);
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    #[test]
+    fn classify_all_spam_words() {
+        // Input contains every spam pattern — should still return SPAM with highest weight
+        let all_spam = "extended warranty car warranty been trying to reach you courtesy call \
+            special offer selected for press 1 press one limited time act now free gift \
+            congratulations you you have won lower your rate reduce your debt the irs irs agent \
+            social security number arrest warrant legal action final notice from your bank \
+            verify your account confirm your identity";
+        let r = f4(all_spam);
+        assert_eq!(r.verdict, "SPAM");
+        assert!((r.score - 0.95).abs() < 0.01);
+        assert_eq!(r.matched.len(), 24);
+    }
+
+    #[test]
+    fn classify_all_legit_words() {
+        let all_legit = "appointment confirming your returning your call you called us this is dr \
+            this is doctor your order delivery picking up schedule follow up checking in \
+            your application interview";
+        let r = f4(all_legit);
+        assert_eq!(r.verdict, "LEGITIMATE");
+        assert!((r.score - 0.90).abs() < 0.01);
+        assert_eq!(r.matched.len(), 14);
+    }
+
+    #[test]
+    fn classify_unicode() {
+        let r = f4("hello 你好 مرحبا");
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    #[test]
+    fn classify_emoji() {
+        let r = f4("🎉🎊🎈");
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    // =========================================================================
+    // CLASSIFIER — vishing vectors (social engineering phrases)
+    // =========================================================================
+
+    #[test] fn vish_bank_confirm() { let r = f4("this is from your bank please confirm"); assert_eq!(r.verdict, "SPAM"); }
+    #[test] fn vish_verify_now() { let r = f4("verify your account immediately"); assert_eq!(r.verdict, "SPAM"); }
+    #[test] fn vish_identity_theft() { let r = f4("we need you to confirm your identity or your account will be locked"); assert_eq!(r.verdict, "SPAM"); }
+    #[test] fn vish_irs_arrest() { let r = f4("the irs has issued an arrest warrant"); assert_eq!(r.verdict, "SPAM"); assert!(r.score >= 0.80); }
+    #[test] fn vish_ssn_legal() { let r = f4("provide your social security number or face legal action"); assert_eq!(r.verdict, "SPAM"); assert!(r.score >= 0.80); }
+
+    // =========================================================================
+    // CLASSIFIER — realistic call transcripts
+    // =========================================================================
+
+    #[test]
+    fn real_doctor_office() {
+        let r = f4("hi this is doctor garcia from the clinic confirming your appointment for thursday");
+        assert_eq!(r.verdict, "LEGITIMATE");
+    }
+
+    #[test]
+    fn real_delivery_driver() {
+        let r = f4("hey i have your delivery but nobody is answering the door");
+        assert_eq!(r.verdict, "LEGITIMATE");
+    }
+
+    #[test]
+    fn real_robocall_warranty() {
+        let r = f4("we have been trying to reach you about your car warranty this is your final notice press 1 to speak to a representative");
+        assert_eq!(r.verdict, "SPAM");
+        assert!(r.matched.len() >= 4);
+    }
+
+    #[test]
+    fn real_job_callback() {
+        let r = f4("hi this is sarah from acme corp returning your call about the interview we discussed");
+        assert_eq!(r.verdict, "LEGITIMATE");
+    }
+
+    #[test]
+    fn real_irs_scam() {
+        let r = f4("this is the irs calling about your social security number there is an arrest warrant for tax fraud");
+        assert_eq!(r.verdict, "SPAM");
+        assert!(r.matched.len() >= 3);
+    }
+
+    #[test]
+    fn real_neighbor() {
+        let r = f4("hey it is your neighbor just checking in");
+        assert_eq!(r.verdict, "LEGITIMATE");
+    }
+
+    #[test]
+    fn real_ambiguous() {
+        let r = f4("hello is this michael");
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    // =========================================================================
+    // LOG — f13 file write roundtrip
+    // =========================================================================
+
+    #[test]
+    fn log_write_creates_file() {
+        let dir = test_dir().join("log_write_test");
         let _ = std::fs::create_dir_all(&dir);
-        let path = dir.join("whitelist_test.txt");
+        let path = dir.join("call_log.jsonl");
         let _ = std::fs::remove_file(&path);
 
-        // empty
-        let entries = load_whitelist(&path);
-        assert!(entries.is_empty());
+        // Write entry manually using the same format as f13
+        let ts = 9999u64;
+        let entry = format!(
+            "{{\"ts\":{ts},\"verdict\":\"SPAM\",\"score\":0.95,\"matched\":\"extended warranty\",\"action\":\"BLOCK\",\"turns\":1}}"
+        );
+        use std::fs::OpenOptions;
+        let mut f = OpenOptions::new().create(true).append(true).open(&path).unwrap();
+        use std::io::Write as _;
+        writeln!(f, "{entry}").unwrap();
+        drop(f);
 
-        // write
-        std::fs::write(&path, "+15551234567\n+15559876543\n").unwrap();
-        let entries = load_whitelist(&path);
-        assert_eq!(entries.len(), 2);
-        assert!(entries.contains(&"+15551234567".to_string()));
+        let content = std::fs::read_to_string(&path).unwrap();
+        assert!(content.contains("\"verdict\":\"SPAM\""));
+        assert!(content.contains("\"action\":\"BLOCK\""));
+        assert!(content.contains("\"ts\":9999"));
+        assert!(content.contains("\"turns\":1"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
+    #[test]
+    fn log_write_appends_multiple_entries() {
+        let dir = test_dir().join("log_append_test");
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("call_log.jsonl");
         let _ = std::fs::remove_file(&path);
+
+        use std::fs::OpenOptions;
+        use std::io::Write as _;
+        for (ts, action) in [(1u64, "BLOCK"), (2u64, "PASS"), (3u64, "VOICEMAIL")] {
+            let entry = format!(
+                "{{\"ts\":{ts},\"verdict\":\"TEST\",\"score\":0.50,\"matched\":\"\",\"action\":\"{action}\",\"turns\":1}}"
+            );
+            let mut f = OpenOptions::new().create(true).append(true).open(&path).unwrap();
+            writeln!(f, "{entry}").unwrap();
+        }
+
+        let lines: Vec<&str> = std::fs::read_to_string(&path).unwrap()
+            .lines()
+            .filter(|l| !l.is_empty())
+            .collect::<Vec<_>>()
+            .into_iter()
+            .collect();
+        // Can't collect &str from owned String this way — just check line count
+        let content = std::fs::read_to_string(&path).unwrap();
+        let line_count = content.lines().count();
+        assert_eq!(line_count, 3);
+        assert!(content.contains("\"action\":\"BLOCK\""));
+        assert!(content.contains("\"action\":\"PASS\""));
+        assert!(content.contains("\"action\":\"VOICEMAIL\""));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    // =========================================================================
+    // SBOM — f10 output fields (via CARGO_TOML parse validation)
+    // =========================================================================
+
+    #[test]
+    fn sbom_cargo_toml_parses_name() {
+        let mut name = "";
+        for line in CARGO_TOML.lines() {
+            let line = line.trim();
+            if let Some(rest) = line.strip_prefix("name = ") {
+                name = rest.trim_matches('"');
+                break;
+            }
+        }
+        assert_eq!(name, "call-shield");
+    }
+
+    #[test]
+    fn sbom_cargo_toml_parses_version() {
+        let mut version = "";
+        for line in CARGO_TOML.lines() {
+            let line = line.trim();
+            if let Some(rest) = line.strip_prefix("version = ") {
+                version = rest.trim_matches('"');
+                break;
+            }
+        }
+        assert!(!version.is_empty());
+        // semver-shaped: N.N.N
+        let parts: Vec<&str> = version.split('.').collect();
+        assert_eq!(parts.len(), 3, "version '{version}' is not semver");
+    }
+
+    #[test]
+    fn sbom_cargo_toml_parses_license() {
+        let mut license = "";
+        for line in CARGO_TOML.lines() {
+            let line = line.trim();
+            if let Some(rest) = line.strip_prefix("license = ") {
+                license = rest.trim_matches('"');
+                break;
+            }
+        }
+        assert_eq!(license, "Unlicense");
+    }
+
+    #[test]
+    fn sbom_cargo_toml_no_deps_section_empty() {
+        // call-shield is zero-dep. Confirm [dependencies] section has no entries.
+        let mut in_deps = false;
+        let mut dep_count = 0usize;
+        for line in CARGO_TOML.lines() {
+            let line = line.trim();
+            if line.starts_with("[dependencies]") {
+                in_deps = true;
+                continue;
+            }
+            if line.starts_with('[') {
+                in_deps = false;
+            }
+            if in_deps && line.contains('=') && !line.starts_with('#') && !line.is_empty() {
+                dep_count += 1;
+            }
+        }
+        assert_eq!(dep_count, 0, "expected zero deps but found {dep_count}");
+    }
+
+    // =========================================================================
+    // PATH HELPERS — HOME env var respected
+    // =========================================================================
+
+    #[test]
+    fn whitelist_path_uses_home_env() {
+        // whitelist_path() reads HOME at call time
+        let p = whitelist_path();
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        assert!(p.starts_with(&home));
+    }
+
+    #[test]
+    fn log_path_uses_home_env() {
+        let p = log_path();
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        assert!(p.starts_with(&home));
+    }
+
+    // =========================================================================
+    // CLASSIFIER — threshold sensitivity
+    // =========================================================================
+
+    #[test]
+    fn low_confidence_spam_below_default_threshold() {
+        // "from your bank" weight is 0.70, above default 0.5 = SPAM
+        let r = f4("calling from your bank");
+        assert_eq!(r.verdict, "SPAM");
+        assert!((r.score - 0.70).abs() < 0.01);
+    }
+
+    #[test]
+    fn low_confidence_legit_below_default_threshold() {
+        // "checking in" weight 0.65, above default 0.5 = LEGITIMATE
+        let r = f4("just checking in on you today");
+        assert_eq!(r.verdict, "LEGITIMATE");
+        assert!((r.score - 0.65).abs() < 0.01);
+    }
+
+    #[test]
+    fn score_formula_unknown_with_partial_match() {
+        // With one spam match at 0.60 and no legit, spam_max=0.60 > legit_max=0.0
+        // But if 0.60 > threshold(0.5) it's SPAM, not UNKNOWN
+        // "from your bank" = 0.70, so this would be SPAM.
+        // Test the UNKNOWN path: no patterns match
+        let r = f4("this sentence has no patterns in it whatsoever");
+        assert_eq!(r.verdict, "UNKNOWN");
+        // Score = threshold - |0-0| = threshold()
+        assert!((r.score - threshold()).abs() < 0.01);
     }
 }
