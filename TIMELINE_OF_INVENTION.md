@@ -107,17 +107,24 @@ Binary: 368,896 bytes (360 KB), zero dependencies.
 **What:** Updated Timeline and Proof of Artifacts with truth audit commit.
 **Commit:** `4c6d8f0`
 
-### 2026-04-02 — v0.2.0: Classifier Fix + Tests + Android Wiring
+### 2026-04-02 — v0.2.0: P23 Guest Analysis + Classifier Fix + Tests
 
-**What:** Guest analysis found 3 critical, 8 major issues. Fixed all critical:
+**What:** P23 Triple Lens analysis (pessimist lens: guest code review across all platforms) found 3 critical, 8 major, 9 minor issues. All critical fixed:
 1. **Classifier false positives:** `"irs"` matched inside "first"/"birthday" — changed to `"the irs"`/`"irs agent"`. Moved `"from your bank"` from legit to spam (vishing vector). Added `"verify your account"` and `"confirm your identity"` to spam. All 4 platforms updated (Rust, iOS, Android, PWA). Pattern count: 38 (24 spam + 14 legit).
 2. **Android screening service:** Wired `IntentClassifier` into `ShieldScreeningService.onScreenCall()`. Removed unused `RECORD_AUDIO` permission.
 3. **iOS dead code:** Removed `CXCallDirectoryManager.reloadExtension` call to non-existent extension.
 4. **17 automated tests:** Classifier correctness, false-positive regression, vishing vector regression, score edge cases, SBOM validation.
 5. **README truth-aligned:** Accurate pattern counts, test count, Whisper marked as target not current.
 
+**Method:** P23 pessimist lens (guest analysis as outside reviewer) identified claim-vs-reality gaps. Paranoia lens flagged vishing vectors ("from your bank" as legit, "irs" substring matching). Synthesis drove the fix priority order.
 **Commit:** `3bb7db2`
-**AI Role:** AI ran guest analysis, identified all issues, implemented fixes and tests. Human directed.
+**AI Role:** AI ran P23 guest analysis, identified all issues, implemented fixes and tests. Human directed.
+
+### 2026-04-02 — Truth-Align All Docs + Cross-Link
+
+**What:** P23 synthesis pass: updated 16 files with accurate metrics (LOC, pattern counts, commit counts), scoped unsafe/FFI claims to correct binaries, updated SSDF PW.9 to Done (17 tests), fixed CMMC command count (3 -> 6), added cochranblock.org rendered footer to all 18 .md files. Marked WHITEPAPER Whisper architecture as target, added historical snapshot banner to USER_STORY_ANALYSIS.
+**Commit:** `f9eb6b8`
+**AI Role:** AI ran full doc audit and applied all fixes. Human directed.
 
 ---
 
