@@ -17,19 +17,50 @@ const GOVDOC_SUPPLY_CHAIN_AUDIT: &str = include_str!("../govdocs/SUPPLY_CHAIN_AU
 // Embedded Cargo.toml for live SBOM
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
 
+/// Global threshold for classification confidence. Default 0.5.
+static mut THRESHOLD: f64 = 0.5;
+
+fn threshold() -> f64 {
+    unsafe { THRESHOLD }
+}
+
 /// f0=main — entry point, CLI dispatch
 fn f0() {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
-    match args.first().map(|s| s.as_str()) {
+    // Parse --threshold before dispatch
+    let mut cmd_args = Vec::new();
+    let mut i = 0;
+    while i < args.len() {
+        if args[i] == "--threshold" {
+            if let Some(val) = args.get(i + 1) {
+                match val.parse::<f64>() {
+                    Ok(t) if (0.0..=1.0).contains(&t) => unsafe { THRESHOLD = t },
+                    _ => {
+                        eprintln!("--threshold must be a number between 0.0 and 1.0");
+                        std::process::exit(1);
+                    }
+                }
+                i += 2;
+                continue;
+            } else {
+                eprintln!("--threshold requires a value (e.g. --threshold 0.7)");
+                std::process::exit(1);
+            }
+        }
+        cmd_args.push(args[i].clone());
+        i += 1;
+    }
+
+    match cmd_args.first().map(|s| s.as_str()) {
         Some("--help") | Some("-h") => f1(),
         Some("--version") | Some("-V") => f2(),
         Some("--sbom") => f10(),
-        Some("classify") => f3(&args[1..]),
+        Some("classify") => f3(&cmd_args[1..]),
         Some("screen") => f7(),
-        Some("govdocs") => f5(&args[1..]),
-        Some("whitelist") => f11(&args[1..]),
-        Some("log") => f12(&args[1..]),
+        Some("govdocs") => f5(&cmd_args[1..]),
+        Some("whitelist") => f11(&cmd_args[1..]),
+        Some("log") => f12(&cmd_args[1..]),
         Some(other) => {
             eprintln!("unknown command: {other}");
             eprintln!("run 'call-shield --help' for usage");
@@ -59,9 +90,13 @@ COMMANDS:
     --help, -h         Show this help
     --version, -V      Show version
 
+OPTIONS:
+    --threshold <0.0-1.0>  Classification confidence cutoff (default: 0.5)
+
 EXAMPLES:
     call-shield screen
     call-shield classify \"We've been trying to reach you about your car's extended warranty\"
+    call-shield --threshold 0.7 classify \"hello this is a courtesy call\"
     call-shield whitelist add \"+15551234567\"
     call-shield govdocs sbom
     call-shield --sbom > sbom.spdx
@@ -138,12 +173,13 @@ fn f4(text: &str) -> T0 {
         }
     }
 
-    if spam_max > legit_max && spam_max > 0.5 {
+    let t = threshold();
+    if spam_max > legit_max && spam_max > t {
         T0::new("SPAM", spam_max, matched)
-    } else if legit_max > spam_max && legit_max > 0.5 {
+    } else if legit_max > spam_max && legit_max > t {
         T0::new("LEGITIMATE", legit_max, matched)
     } else {
-        T0::new("UNKNOWN", 0.5 - (spam_max - legit_max).abs(), matched)
+        T0::new("UNKNOWN", t - (spam_max - legit_max).abs(), matched)
     }
 }
 
