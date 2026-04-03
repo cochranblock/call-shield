@@ -58,6 +58,8 @@ public class ShieldActivity extends Activity {
     private void requestScreeningRole() {
         RoleManager rm = getSystemService(RoleManager.class);
         Intent intent = rm.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
+        // Using deprecated startActivityForResult: registerForActivityResult requires androidx.activity
+        // dependency. Zero-dep policy takes precedence over API modernity.
         startActivityForResult(intent, REQUEST_SCREENING_ROLE);
     }
 

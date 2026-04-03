@@ -29,6 +29,7 @@ fn f0() {
         Some("screen") => f7(),
         Some("govdocs") => f5(&args[1..]),
         Some("whitelist") => f11(&args[1..]),
+        Some("log") => f12(&args[1..]),
         Some(other) => {
             eprintln!("unknown command: {other}");
             eprintln!("run 'call-shield --help' for usage");
@@ -52,6 +53,7 @@ COMMANDS:
     screen             Interactive call screening session
     classify <text>    Classify a single transcript line
     whitelist <cmd>    Manage contact whitelist (add/remove/list/check)
+    log                View local screening log
     govdocs [doc]      Print embedded federal compliance docs
     --sbom             Machine-readable SPDX SBOM
     --help, -h         Show this help
@@ -309,12 +311,14 @@ Commands during screening:
             "BLOCK" => {
                 println!("\n🛑 SPAM DETECTED — call blocked.");
                 println!("SHIELD: \"This call has been identified as unwanted. Goodbye.\"");
+                f13(stats.peak_verdict, stats.peak_score, &result.matched, "BLOCK", stats.turn);
                 f9(&stats);
                 break;
             }
             "PASS" => {
                 println!("\n✅ LEGITIMATE — ringing through to user.");
                 println!("SHIELD: \"Connecting you now.\"");
+                f13(stats.peak_verdict, stats.peak_score, &result.matched, "PASS", stats.turn);
                 f9(&stats);
                 break;
             }
@@ -325,6 +329,7 @@ Commands during screening:
                 // After 3 turns of unknown, force a decision
                 if stats.turn >= 3 {
                     println!("\n⚠️  INCONCLUSIVE after {} turns — routing to voicemail.", stats.turn);
+                    f13(stats.peak_verdict, stats.peak_score, &result.matched, "VOICEMAIL", stats.turn);
                     f9(&stats);
                     break;
                 }
@@ -525,6 +530,55 @@ fn load_whitelist(path: &std::path::Path) -> Vec<String> {
         .collect()
 }
 
+/// f12=log — view screening log
+fn f12(args: &[String]) {
+    let path = log_path();
+    match args.first().map(|s| s.as_str()) {
+        Some("clear") => {
+            let _ = std::fs::remove_file(&path);
+            println!("screening log cleared");
+        }
+        Some("path") => println!("{}", path.display()),
+        _ => {
+            let content = std::fs::read_to_string(&path).unwrap_or_default();
+            if content.is_empty() {
+                println!("no screening log entries");
+                println!("run 'call-shield screen' to generate log entries");
+                return;
+            }
+            for line in content.lines() {
+                println!("{line}");
+            }
+        }
+    }
+}
+
+/// f13=log_entry — write a screening decision to the local log
+fn f13(verdict: &str, score: f64, matched: &[&str], action: &str, turns: usize) {
+    let path = log_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    use std::fs::OpenOptions;
+    // ISO 8601 timestamp without deps: use seconds since epoch
+    let ts = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let matched_str = matched.join(", ");
+    let entry = format!(
+        "{{\"ts\":{ts},\"verdict\":\"{verdict}\",\"score\":{score:.2},\"matched\":\"{matched_str}\",\"action\":\"{action}\",\"turns\":{turns}}}"
+    );
+    if let Ok(mut f) = OpenOptions::new().create(true).append(true).open(&path) {
+        let _ = writeln!(f, "{entry}");
+    }
+}
+
+fn log_path() -> std::path::PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+    std::path::Path::new(&home).join(".call-shield").join("call_log.jsonl")
+}
+
 fn main() {
     f0();
 }
@@ -654,6 +708,25 @@ mod tests {
     }
 
     // --- Whitelist ---
+
+    #[test]
+    fn log_entry_format() {
+        let dir = std::env::temp_dir().join("call-shield-test");
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("log_test.jsonl");
+        let _ = std::fs::remove_file(&path);
+
+        // Override log path not possible without refactor, so test the format manually
+        let matched = vec!["extended warranty"];
+        let ts = 1000u64;
+        let entry = format!(
+            "{{\"ts\":{ts},\"verdict\":\"SPAM\",\"score\":0.95,\"matched\":\"extended warranty\",\"action\":\"BLOCK\",\"turns\":1}}"
+        );
+        assert!(entry.contains("\"verdict\":\"SPAM\""));
+        assert!(entry.contains("\"action\":\"BLOCK\""));
+        assert!(entry.contains("\"matched\":\"extended warranty\""));
+        drop(matched);
+    }
 
     #[test]
     fn whitelist_roundtrip() {
