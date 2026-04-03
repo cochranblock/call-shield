@@ -39,11 +39,15 @@ public final class IntentClassifier {
         {"you have won", "0.90"},
         {"lower your rate", "0.85"},
         {"reduce your debt", "0.85"},
-        {"irs", "0.75"},
+        {"the irs", "0.80"},
+        {"irs agent", "0.85"},
         {"social security number", "0.95"},
         {"arrest warrant", "0.95"},
         {"legal action", "0.80"},
         {"final notice", "0.85"},
+        {"from your bank", "0.70"},
+        {"verify your account", "0.85"},
+        {"confirm your identity", "0.80"},
     };
 
     // s1=legit patterns
@@ -54,7 +58,6 @@ public final class IntentClassifier {
         {"you called us", "0.85"},
         {"this is dr", "0.80"},
         {"this is doctor", "0.80"},
-        {"from your bank", "0.60"},
         {"your order", "0.70"},
         {"delivery", "0.70"},
         {"picking up", "0.75"},

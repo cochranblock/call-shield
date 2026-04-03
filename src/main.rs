@@ -121,11 +121,15 @@ fn f4(text: &str) -> T0 {
         ("you have won", 0.90),
         ("lower your rate", 0.85),
         ("reduce your debt", 0.85),
-        ("irs", 0.75),
+        ("the irs", 0.80),
+        ("irs agent", 0.85),
         ("social security number", 0.95),
         ("arrest warrant", 0.95),
         ("legal action", 0.80),
         ("final notice", 0.85),
+        ("from your bank", 0.70),
+        ("verify your account", 0.85),
+        ("confirm your identity", 0.80),
     ];
 
     // s1=legit_patterns
@@ -136,7 +140,6 @@ fn f4(text: &str) -> T0 {
         ("you called us", 0.85),
         ("this is dr", 0.80),
         ("this is doctor", 0.80),
-        ("from your bank", 0.60),
         ("your order", 0.70),
         ("delivery", 0.70),
         ("picking up", 0.75),
@@ -471,4 +474,129 @@ fn f10() {
 
 fn main() {
     f0();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- Classifier correctness ---
+
+    #[test]
+    fn spam_extended_warranty() {
+        let r = f4("your extended warranty is expiring");
+        assert_eq!(r.verdict, "SPAM");
+        assert!(r.score >= 0.90);
+    }
+
+    #[test]
+    fn spam_car_warranty() {
+        let r = f4("we are calling about your car warranty");
+        assert_eq!(r.verdict, "SPAM");
+    }
+
+    #[test]
+    fn spam_press_1() {
+        let r = f4("press 1 to speak to an agent");
+        assert_eq!(r.verdict, "SPAM");
+        assert!(r.score >= 0.90);
+    }
+
+    #[test]
+    fn legit_appointment() {
+        let r = f4("confirming your appointment for tuesday");
+        assert_eq!(r.verdict, "LEGITIMATE");
+        assert!(r.score >= 0.80);
+    }
+
+    #[test]
+    fn legit_returning_call() {
+        let r = f4("hi, returning your call from earlier");
+        assert_eq!(r.verdict, "LEGITIMATE");
+        assert!(r.score >= 0.90);
+    }
+
+    #[test]
+    fn unknown_hello() {
+        let r = f4("hello");
+        assert_eq!(r.verdict, "UNKNOWN");
+    }
+
+    #[test]
+    fn unknown_empty() {
+        let r = f4("");
+        assert_eq!(r.verdict, "UNKNOWN");
+        assert!((r.score - 0.50).abs() < 0.01);
+    }
+
+    // --- False-positive regression (irs fix) ---
+
+    #[test]
+    fn first_not_spam() {
+        let r = f4("this is your first appointment");
+        assert_ne!(r.verdict, "SPAM", "'first' must not match 'irs'");
+    }
+
+    #[test]
+    fn birthday_not_spam() {
+        let r = f4("happy birthday");
+        assert_ne!(r.verdict, "SPAM", "'birthday' must not match 'irs'");
+    }
+
+    #[test]
+    fn thirsty_not_spam() {
+        let r = f4("i am thirsty");
+        assert_ne!(r.verdict, "SPAM");
+    }
+
+    // --- Vishing vector regression ---
+
+    #[test]
+    fn from_your_bank_is_spam() {
+        let r = f4("this is from your bank please confirm");
+        assert_eq!(r.verdict, "SPAM", "'from your bank' is a vishing vector");
+    }
+
+    #[test]
+    fn verify_account_is_spam() {
+        let r = f4("we need to verify your account");
+        assert_eq!(r.verdict, "SPAM");
+    }
+
+    #[test]
+    fn confirm_identity_is_spam() {
+        let r = f4("please confirm your identity");
+        assert_eq!(r.verdict, "SPAM");
+    }
+
+    // --- Score logic ---
+
+    #[test]
+    fn spam_beats_legit_when_higher() {
+        let r = f4("extended warranty for your appointment");
+        assert_eq!(r.verdict, "SPAM");
+        assert!(r.score > 0.80);
+    }
+
+    #[test]
+    fn legit_beats_spam_when_higher() {
+        let r = f4("returning your call about a limited time schedule");
+        assert_eq!(r.verdict, "LEGITIMATE");
+    }
+
+    #[test]
+    fn score_never_negative() {
+        for input in ["", "hello", "random words", "a b c d e f"] {
+            let r = f4(input);
+            assert!(r.score >= 0.0, "score for '{input}' was {}", r.score);
+        }
+    }
+
+    // --- SBOM output ---
+
+    #[test]
+    fn sbom_contains_spdx_header() {
+        // f10 prints to stdout, so we test the govdoc embed instead
+        assert!(GOVDOC_SBOM.contains("Software Bill of Materials"));
+    }
 }

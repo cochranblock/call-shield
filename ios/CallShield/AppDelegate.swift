@@ -26,15 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = vc
         window?.makeKeyAndVisible()
 
-        // Register call directory extension for blocking
-        CXCallDirectoryManager.sharedInstance.reloadExtension(
-            withIdentifier: "org.cochranblock.callshield.directory"
-        ) { error in
-            if let error = error {
-                print("CallDirectory reload error: \(error)")
-            }
-        }
-
+        // TODO: add CXCallDirectoryExtension target for call blocking
         return true
     }
 }

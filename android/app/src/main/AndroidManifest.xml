@@ -4,7 +4,7 @@
     <!-- Call screening requires these permissions -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <!-- No internet permission. Zero cloud. Ever. -->
     <!-- <uses-permission android:name="android.permission.INTERNET" /> INTENTIONALLY ABSENT -->
