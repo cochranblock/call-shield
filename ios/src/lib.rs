@@ -22,7 +22,9 @@ pub unsafe extern "C" fn call_shield_classify(transcript: *const c_char) -> *mut
 
     let (verdict, score, matched) = classify(&text);
     let result = format!("{verdict}|{score:.2}|{matched}");
-    CString::new(result).unwrap().into_raw()
+    CString::new(result)
+        .unwrap_or_else(|_| CString::new("UNKNOWN|0.50|").unwrap())
+        .into_raw()
 }
 
 /// Free a string returned by `call_shield_classify`.
@@ -42,51 +44,8 @@ pub extern "C" fn call_shield_version() -> *const c_char {
     c"0.1.0".as_ptr()
 }
 
-// s0=spam patterns
-const SPAM: &[(&str, f64)] = &[
-    ("extended warranty", 0.95),
-    ("car warranty", 0.95),
-    ("been trying to reach you", 0.90),
-    ("courtesy call", 0.85),
-    ("special offer", 0.85),
-    ("selected for", 0.80),
-    ("press 1", 0.90),
-    ("press one", 0.90),
-    ("limited time", 0.80),
-    ("act now", 0.80),
-    ("free gift", 0.85),
-    ("congratulations you", 0.85),
-    ("you have won", 0.90),
-    ("lower your rate", 0.85),
-    ("reduce your debt", 0.85),
-    ("the irs", 0.80),
-    ("irs agent", 0.85),
-    ("social security number", 0.95),
-    ("arrest warrant", 0.95),
-    ("legal action", 0.80),
-    ("final notice", 0.85),
-    ("from your bank", 0.70),
-    ("verify your account", 0.85),
-    ("confirm your identity", 0.80),
-];
-
-// s1=legit patterns
-const LEGIT: &[(&str, f64)] = &[
-    ("appointment", 0.80),
-    ("confirming your", 0.85),
-    ("returning your call", 0.90),
-    ("you called us", 0.85),
-    ("this is dr", 0.80),
-    ("this is doctor", 0.80),
-    ("your order", 0.70),
-    ("delivery", 0.70),
-    ("picking up", 0.75),
-    ("schedule", 0.70),
-    ("follow up", 0.70),
-    ("checking in", 0.65),
-    ("your application", 0.65),
-    ("interview", 0.80),
-];
+// s0/s1 — generated from patterns.csv at build time
+include!(concat!(env!("OUT_DIR"), "/patterns.rs"));
 
 fn classify(text: &str) -> (&'static str, f64, String) {
     let mut spam_max = 0.0_f64;
@@ -113,5 +72,62 @@ fn classify(text: &str) -> (&'static str, f64, String) {
         ("LEGITIMATE", legit_max, joined)
     } else {
         ("UNKNOWN", 0.5 - (spam_max - legit_max).abs(), joined)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn spam_extended_warranty() {
+        let (v, s, _) = classify("your extended warranty is expiring");
+        assert_eq!(v, "SPAM");
+        assert!(s >= 0.90);
+    }
+
+    #[test]
+    fn legit_appointment() {
+        let (v, s, _) = classify("confirming your appointment for tuesday");
+        assert_eq!(v, "LEGITIMATE");
+        assert!(s >= 0.80);
+    }
+
+    #[test]
+    fn unknown_hello() {
+        let (v, _, _) = classify("hello");
+        assert_eq!(v, "UNKNOWN");
+    }
+
+    #[test]
+    fn first_not_spam() {
+        let (v, _, _) = classify("this is your first appointment");
+        assert_ne!(v, "SPAM", "'first' must not match 'irs'");
+    }
+
+    #[test]
+    fn birthday_not_spam() {
+        let (v, _, _) = classify("happy birthday");
+        assert_ne!(v, "SPAM");
+    }
+
+    #[test]
+    fn from_your_bank_is_spam() {
+        let (v, _, _) = classify("this is from your bank please confirm");
+        assert_eq!(v, "SPAM");
+    }
+
+    #[test]
+    fn verify_account_is_spam() {
+        let (v, _, _) = classify("we need to verify your account");
+        assert_eq!(v, "SPAM");
+    }
+
+    #[test]
+    fn score_never_negative() {
+        for input in ["", "hello", "random words"] {
+            let (_, s, _) = classify(input);
+            assert!(s >= 0.0, "score for '{input}' was {s}");
+        }
     }
 }

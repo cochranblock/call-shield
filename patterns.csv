@@ -1,0 +1,39 @@
+category,pattern,weight
+spam,extended warranty,0.95
+spam,car warranty,0.95
+spam,been trying to reach you,0.90
+spam,courtesy call,0.85
+spam,special offer,0.85
+spam,selected for,0.80
+spam,press 1,0.90
+spam,press one,0.90
+spam,limited time,0.80
+spam,act now,0.80
+spam,free gift,0.85
+spam,congratulations you,0.85
+spam,you have won,0.90
+spam,lower your rate,0.85
+spam,reduce your debt,0.85
+spam,the irs,0.80
+spam,irs agent,0.85
+spam,social security number,0.95
+spam,arrest warrant,0.95
+spam,legal action,0.80
+spam,final notice,0.85
+spam,from your bank,0.70
+spam,verify your account,0.85
+spam,confirm your identity,0.80
+legit,appointment,0.80
+legit,confirming your,0.85
+legit,returning your call,0.90
+legit,you called us,0.85
+legit,this is dr,0.80
+legit,this is doctor,0.80
+legit,your order,0.70
+legit,delivery,0.70
+legit,picking up,0.75
+legit,schedule,0.70
+legit,follow up,0.70
+legit,checking in,0.65
+legit,your application,0.65
+legit,interview,0.80

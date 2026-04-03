@@ -12,6 +12,7 @@ const GOVDOC_FEDRAMP: &str = include_str!("../govdocs/FedRAMP_NOTES.md");
 const GOVDOC_CMMC: &str = include_str!("../govdocs/CMMC.md");
 const GOVDOC_ITAR_EAR: &str = include_str!("../govdocs/ITAR_EAR.md");
 const GOVDOC_FEDERAL_USE_CASES: &str = include_str!("../govdocs/FEDERAL_USE_CASES.md");
+const GOVDOC_SUPPLY_CHAIN_AUDIT: &str = include_str!("../govdocs/SUPPLY_CHAIN_AUDIT.md");
 
 // Embedded Cargo.toml for live SBOM
 const CARGO_TOML: &str = include_str!("../Cargo.toml");
@@ -102,53 +103,13 @@ impl T0 {
     }
 }
 
+// s0/s1 — generated from patterns.csv at build time
+include!(concat!(env!("OUT_DIR"), "/patterns.rs"));
+
 /// f4=score — pattern-match classifier
 fn f4(text: &str) -> T0 {
-    // s0=spam_patterns
-    let s0: &[(&str, f64)] = &[
-        ("extended warranty", 0.95),
-        ("car warranty", 0.95),
-        ("been trying to reach you", 0.90),
-        ("courtesy call", 0.85),
-        ("special offer", 0.85),
-        ("selected for", 0.80),
-        ("press 1", 0.90),
-        ("press one", 0.90),
-        ("limited time", 0.80),
-        ("act now", 0.80),
-        ("free gift", 0.85),
-        ("congratulations you", 0.85),
-        ("you have won", 0.90),
-        ("lower your rate", 0.85),
-        ("reduce your debt", 0.85),
-        ("the irs", 0.80),
-        ("irs agent", 0.85),
-        ("social security number", 0.95),
-        ("arrest warrant", 0.95),
-        ("legal action", 0.80),
-        ("final notice", 0.85),
-        ("from your bank", 0.70),
-        ("verify your account", 0.85),
-        ("confirm your identity", 0.80),
-    ];
-
-    // s1=legit_patterns
-    let s1: &[(&str, f64)] = &[
-        ("appointment", 0.80),
-        ("confirming your", 0.85),
-        ("returning your call", 0.90),
-        ("you called us", 0.85),
-        ("this is dr", 0.80),
-        ("this is doctor", 0.80),
-        ("your order", 0.70),
-        ("delivery", 0.70),
-        ("picking up", 0.75),
-        ("schedule", 0.70),
-        ("follow up", 0.70),
-        ("checking in", 0.65),
-        ("your application", 0.65),
-        ("interview", 0.80),
-    ];
+    let s0 = SPAM_PATTERNS;
+    let s1 = LEGIT_PATTERNS;
 
     let mut spam_max = 0.0_f64;
     let mut legit_max = 0.0_f64;
@@ -195,6 +156,7 @@ fn f5(args: &[String]) {
         Some("cmmc") => println!("{GOVDOC_CMMC}"),
         Some("itar-ear") | Some("export") => println!("{GOVDOC_ITAR_EAR}"),
         Some("federal-use-cases") | Some("use-cases") => println!("{GOVDOC_FEDERAL_USE_CASES}"),
+        Some("supply-chain-audit") | Some("audit") => println!("{GOVDOC_SUPPLY_CHAIN_AUDIT}"),
         Some("all") => f6(),
         Some(other) => {
             eprintln!("unknown govdoc: {other}");
@@ -220,6 +182,7 @@ DOCUMENTS:
     cmmc              CMMC Level 1-2 practice mapping
     itar-ear          ITAR/EAR export classification
     use-cases         Federal agency use cases
+    audit             Supply chain audit (deep code review)
     all               Print all documents
 
 MACHINE-READABLE:
@@ -243,6 +206,7 @@ fn f6() {
         ("CMMC", GOVDOC_CMMC),
         ("ITAR/EAR", GOVDOC_ITAR_EAR),
         ("Federal Use Cases", GOVDOC_FEDERAL_USE_CASES),
+        ("Supply Chain Audit", GOVDOC_SUPPLY_CHAIN_AUDIT),
     ];
     for (name, content) in docs {
         println!("{}", "=".repeat(72));
@@ -286,6 +250,9 @@ Commands during screening:
         let mut line = String::new();
         if stdin.lock().read_line(&mut line).unwrap_or(0) == 0 {
             break;
+        }
+        if line.len() > 4096 {
+            line.truncate(4096);
         }
         let line = line.trim();
 
