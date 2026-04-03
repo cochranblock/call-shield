@@ -28,6 +28,7 @@ fn f0() {
         Some("classify") => f3(&args[1..]),
         Some("screen") => f7(),
         Some("govdocs") => f5(&args[1..]),
+        Some("whitelist") => f11(&args[1..]),
         Some(other) => {
             eprintln!("unknown command: {other}");
             eprintln!("run 'call-shield --help' for usage");
@@ -50,6 +51,7 @@ USAGE:
 COMMANDS:
     screen             Interactive call screening session
     classify <text>    Classify a single transcript line
+    whitelist <cmd>    Manage contact whitelist (add/remove/list/check)
     govdocs [doc]      Print embedded federal compliance docs
     --sbom             Machine-readable SPDX SBOM
     --help, -h         Show this help
@@ -58,6 +60,7 @@ COMMANDS:
 EXAMPLES:
     call-shield screen
     call-shield classify \"We've been trying to reach you about your car's extended warranty\"
+    call-shield whitelist add \"+15551234567\"
     call-shield govdocs sbom
     call-shield --sbom > sbom.spdx
 
@@ -439,6 +442,89 @@ fn f10() {
     }
 }
 
+/// f11=whitelist — manage contact whitelist
+fn f11(args: &[String]) {
+    let path = whitelist_path();
+
+    match args.first().map(|s| s.as_str()) {
+        Some("add") => {
+            if args.len() < 2 {
+                eprintln!("usage: call-shield whitelist add <number>");
+                std::process::exit(1);
+            }
+            let number = args[1..].join(" ").trim().to_string();
+            let existing = load_whitelist(&path);
+            if existing.contains(&number) {
+                println!("already whitelisted: {number}");
+                return;
+            }
+            if let Some(parent) = path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            use std::fs::OpenOptions;
+            let mut f = OpenOptions::new().create(true).append(true).open(&path).unwrap();
+            writeln!(f, "{number}").unwrap();
+            println!("added: {number}");
+        }
+        Some("remove") => {
+            if args.len() < 2 {
+                eprintln!("usage: call-shield whitelist remove <number>");
+                std::process::exit(1);
+            }
+            let number = args[1..].join(" ").trim().to_string();
+            let entries: Vec<String> = load_whitelist(&path)
+                .into_iter()
+                .filter(|e| e != &number)
+                .collect();
+            std::fs::write(&path, entries.join("\n") + "\n").unwrap();
+            println!("removed: {number}");
+        }
+        Some("check") => {
+            if args.len() < 2 {
+                eprintln!("usage: call-shield whitelist check <number>");
+                std::process::exit(1);
+            }
+            let number = args[1..].join(" ").trim().to_string();
+            if load_whitelist(&path).contains(&number) {
+                println!("{number}: WHITELISTED");
+            } else {
+                println!("{number}: not whitelisted");
+            }
+        }
+        Some("list") | None => {
+            let entries = load_whitelist(&path);
+            if entries.is_empty() {
+                println!("whitelist is empty");
+                println!("add numbers: call-shield whitelist add <number>");
+            } else {
+                println!("whitelisted contacts ({}):", entries.len());
+                for e in &entries {
+                    println!("  {e}");
+                }
+            }
+        }
+        Some(other) => {
+            eprintln!("unknown whitelist command: {other}");
+            eprintln!("commands: add, remove, check, list");
+            std::process::exit(1);
+        }
+    }
+}
+
+fn whitelist_path() -> std::path::PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+    std::path::Path::new(&home).join(".call-shield").join("whitelist.txt")
+}
+
+fn load_whitelist(path: &std::path::Path) -> Vec<String> {
+    std::fs::read_to_string(path)
+        .unwrap_or_default()
+        .lines()
+        .map(|l| l.trim().to_string())
+        .filter(|l| !l.is_empty())
+        .collect()
+}
+
 fn main() {
     f0();
 }
@@ -565,5 +651,27 @@ mod tests {
     fn sbom_contains_spdx_header() {
         // f10 prints to stdout, so we test the govdoc embed instead
         assert!(GOVDOC_SBOM.contains("Software Bill of Materials"));
+    }
+
+    // --- Whitelist ---
+
+    #[test]
+    fn whitelist_roundtrip() {
+        let dir = std::env::temp_dir().join("call-shield-test");
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("whitelist_test.txt");
+        let _ = std::fs::remove_file(&path);
+
+        // empty
+        let entries = load_whitelist(&path);
+        assert!(entries.is_empty());
+
+        // write
+        std::fs::write(&path, "+15551234567\n+15559876543\n").unwrap();
+        let entries = load_whitelist(&path);
+        assert_eq!(entries.len(), 2);
+        assert!(entries.contains(&"+15551234567".to_string()));
+
+        let _ = std::fs::remove_file(&path);
     }
 }
