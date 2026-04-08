@@ -6,6 +6,59 @@
 
 ---
 
+## Human Revelations — Invented Techniques
+
+*Novel ideas that came from human insight, not AI suggestion. These are original contributions to the field.*
+
+### Sub-Millisecond Pattern-Match Call Screening (March 2026)
+
+**Invention:** A call screening engine that classifies caller intent using 38 text patterns (24 spam + 14 legit) in a 360KB binary with zero dependencies — no ML model, no cloud API, no Whisper, just pattern matching fast enough to run between rings.
+
+**The Problem:** Google Call Screen uses cloud ML. Apple's Silence Unknown Callers is binary (block all or nothing). Third-party apps require network access and phone permissions. Every solution either sends your call data to the cloud or lacks nuance (spam/not-spam with no middle ground).
+
+**The Insight:** 90% of spam calls identify themselves in the first sentence. "This is the IRS." "Your car's extended warranty." "You've been selected." These patterns are so consistent that a regex-level classifier catches them. You don't need a 39MB Whisper model for the common case — you need 38 string patterns and a scoring function. Save the ML for the 10% of ambiguous calls.
+
+**The Technique:**
+1. 24 spam patterns: "irs agent", "extended warranty", "verify your account", "confirm your identity", etc.
+2. 14 legit patterns: "this is dr", "pharmacy", "school calling", "appointment", etc.
+3. Scoring: sum matched patterns per category, classify as spam/legit/unknown
+4. Multi-turn screening: if unknown after 3 turns, route to voicemail
+5. False-positive hardening: "irs" won't match inside "first" or "birthday" — patterns use context-aware matching
+
+**Result:** Classification in <1ms. 360KB binary. Zero network calls. Runs on any Android via CallScreeningService, any iOS via CallKit, or any browser via PWA. The common case (obvious spam) is handled instantly; only ambiguous calls need human judgment.
+
+**Named:** Pattern-Match Call Screening
+**Commit:** `a8d679b` (classifier), `3bb7db2` (v0.2.0 false-positive fix)
+**Origin:** Michael Cochran built zero-cloud infrastructure for a living, then realized his own phone used Google's cloud for call screening. The contradiction prompted the question: "What's the smallest possible binary that can screen calls?" Answer: 360KB.
+
+### Vishing Vector Regression Testing (April 2026)
+
+**Invention:** Automated regression tests that verify known vishing (voice phishing) attack vectors are correctly classified as spam, and known false-positive triggers are correctly classified as legit — preventing classifier updates from accidentally making the phone vulnerable.
+
+**The Problem:** Classifier pattern updates can introduce regressions. Adding "from your bank" to the legit list (because your actual bank says it) also matches vishing attacks ("I'm calling from your bank, we need your SSN"). Moving patterns between categories requires testing every known attack vector, which humans forget to do.
+
+**The Insight:** Vishing attack phrases are documented in FBI IC3 reports and CISA advisories. False-positive triggers (common words that match spam patterns) are discoverable by testing against normal conversation. If both sets are encoded as regression tests, every classifier update is automatically validated against known attacks AND known false positives.
+
+**The Technique:**
+1. Vishing vector tests: verify "from your bank" + SSN request = spam, "verify your account" = spam, "confirm your identity" = spam
+2. False-positive tests: verify "first" doesn't trigger IRS pattern, "birthday" doesn't trigger IRS pattern
+3. Legit regression tests: verify "this is dr smith" = legit, "pharmacy calling" = legit
+4. All 17 tests run through Triple Sims (3x)
+
+**Result:** P23 paranoia lens identified "from your bank" as a vishing vector that was classified as legit. Moved to spam. Regression tests now prevent reintroduction. Every classifier change is validated against known attack patterns.
+
+**Named:** Vishing Vector Regression
+**Commit:** `3bb7db2`
+**Origin:** P23 paranoia lens applied to call-shield — "what if an attacker knows our legit patterns and crafts phrases to match them?" The paranoia perspective identified a real vulnerability.
+
+### 2026-04-08 — Human Revelations Documentation Pass
+
+**What:** Documented novel human-invented techniques across the full CochranBlock portfolio. Added Human Revelations section with Pattern-Match Call Screening and Vishing Vector Regression.
+**Commit:** See git log
+**AI Role:** AI formatted and wrote the sections. Human identified which techniques were genuinely novel, provided the origin stories, and directed the documentation pass.
+
+---
+
 ## Entries
 
 ### 2026-03-26 — Call Shield Whitepaper + Scaffold
