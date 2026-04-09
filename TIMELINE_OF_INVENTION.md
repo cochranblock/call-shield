@@ -179,6 +179,16 @@ Binary: 368,896 bytes (360 KB), zero dependencies.
 **Commit:** `f9eb6b8`
 **AI Role:** AI ran full doc audit and applied all fixes. Human directed.
 
+### 2026-04-09 — Android Privacy Hardening + JUnit Mirror Suite
+
+**What:** Cleared backlog #2 with two changes:
+1. **Removed `READ_CALL_LOG` permission** from `AndroidManifest.xml` — was never read by any Java source. Granting it would have given Call Shield full access to device call history, contradicting the privacy story and flagging in Play Store review. `READ_PHONE_STATE` is sufficient for `CallScreeningService`.
+2. **JUnit test suite for `IntentClassifier`** — 60+ JVM unit tests in `android/app/src/test/java/org/cochranblock/callshield/IntentClassifierTest.java`, mirroring the Rust suite in `src/main.rs`. Coverage: every spam pattern, every legit pattern, unknown/no-match, case insensitivity, false-positive regression, multi-pattern resolution, score boundary conditions, and high-stakes vishing vectors. Wired JUnit 4.13.2 as `testImplementation` only — build-time, never shipped to device, zero-runtime-deps preserved.
+
+Backlog renumbered (former #1, the `THRESHOLD` AtomicU64 fix, had already shipped in `6821641`). Rust gate: 152/152 still green.
+**Commit:** `72de8c0`
+**AI Role:** AI removed the permission, ported the Rust tests to JUnit, and wired Gradle. Human directed.
+
 ---
 
 *Part of the [CochranBlock](https://cochranblock.org) zero-cloud architecture. All source under the Unlicense.*

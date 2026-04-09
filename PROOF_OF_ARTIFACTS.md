@@ -88,6 +88,7 @@ flowchart TD
 | Truth audit | 2026-03-30 | PASS — all claims verified |
 | Supply chain audit | 2026-03-30 | PASS — 0 deps, 0 advisories |
 | v0.2.0 test suite | 2026-04-02 | PASS — 17 tests, 0 failures |
+| Android privacy hardening | 2026-04-09 | PASS — Rust 152/152, READ_CALL_LOG dropped, JUnit IntentClassifier suite added (60+ tests, build-time dep only). Commit `72de8c0`, cleared backlog #2. |
 
 ## P23 Triple Lens Analysis (2026-04-02)
 
