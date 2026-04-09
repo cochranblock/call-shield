@@ -26,8 +26,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
-    // Zero cloud dependencies. Everything on-device.
+    // Zero runtime dependencies. Everything on-device.
+    // JUnit is build-time only — never shipped to the device.
+    testImplementation 'junit:junit:4.13.2'
 }

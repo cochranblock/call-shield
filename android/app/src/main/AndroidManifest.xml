@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Call screening requires these permissions -->
+    <!-- Call screening requires only READ_PHONE_STATE.
+         READ_CALL_LOG intentionally NOT requested: we never read history,
+         and asking for it would contradict the privacy story + flag in Play review. -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-
 
     <!-- No internet permission. Zero cloud. Ever. -->
     <!-- <uses-permission android:name="android.permission.INTERNET" /> INTENTIONALLY ABSENT -->
