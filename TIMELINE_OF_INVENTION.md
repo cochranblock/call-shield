@@ -188,7 +188,7 @@ Binary: 368,896 bytes (360 KB), zero dependencies.
 3. README rewrite with quick start, usage examples, and roadmap
 
 Updated compression map to f0-f4, t0, s0-s1. Binary grew to 319,248 bytes (312 KB) with classifier.
-**Why:** Score the gap between scaffold and shippable, then close the highest-leverage gaps first.
+**Why:** Score the gap between scaffold and shippable, then close the highest-impact gaps first.
 **Commit:** `a8d679b`
 **AI Role:** AI ran user story analysis, identified gaps, implemented all three fixes. Human directed the analysis.
 **Proof:** [USER_STORY_ANALYSIS.md](USER_STORY_ANALYSIS.md)
