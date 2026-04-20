@@ -12,5 +12,6 @@
 *.orig
 *.bak
 *.log
+!binary-sizes.log
 *.env
 *.jks
