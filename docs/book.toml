@@ -1,0 +1,13 @@
+[book]
+title = "call-shield"
+description = "Sub-ms call screening. 48 KB binary, no cloud."
+src = "src"
+language = "en"
+
+[output.html]
+git-repository-url = "https://github.com/cochranblock/call-shield"
+site-url = "/call-shield/"
+additional-css = ["theme/custom.css"]
+additional-js = ["theme/force-theme.js"]
+default-theme = "coal"
+preferred-dark-theme = "coal"
